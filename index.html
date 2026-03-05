@@ -1,3 +1,7 @@
+<!-- =========================
+PARTE 1 / 3
+Tech Blue • Node Engine V1.3 (FULL)
+========================= -->
 <!doctype html>
 <html lang="es">
 <head>
@@ -31,7 +35,6 @@
     overflow:hidden;
   }
 
-  /* Top bar */
   header{
     position:fixed; inset:10px 10px auto 10px;
     display:flex; align-items:center; justify-content:space-between;
@@ -64,7 +67,6 @@
     display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;
     align-items:center;
   }
-
   .btn{
     border:1px solid var(--line);
     background: rgba(10,18,40,.55);
@@ -82,7 +84,6 @@
   .btn.bad{border-color: rgba(239,71,111,.35)}
   .btn.good{border-color: rgba(32,201,151,.35)}
   .btn.warn{border-color: rgba(255,176,32,.35)}
-
   .pill{
     border:1px solid rgba(79,155,255,.25);
     background: rgba(10,18,40,.55);
@@ -102,17 +103,14 @@
     font-size:12px;
   }
 
-  /* Stage */
   #stage{ position:absolute; inset:0; overflow:hidden; }
   #wires{ position:absolute; inset:0; z-index:5; pointer-events:none; }
   #nodes{ position:absolute; inset:0; z-index:10; }
 
-  /* Node */
   .node{
     position:absolute;
     width: 320px;
-    height: 320px;
-    max-width: min(92vw, 760px);
+    max-width: min(92vw, 520px);
     border-radius: 20px;
     border:1px solid var(--line);
     background: linear-gradient(180deg, rgba(15,22,48,.78), rgba(11,20,48,.55));
@@ -121,12 +119,10 @@
     overflow:hidden;
     user-select:none;
     transform: translate3d(0,0,0);
-    min-width:260px;
-    min-height:200px;
   }
-  .node[data-type="core"]{ width: 360px; height: 360px; }
-  .node[data-type="chart"]{ width: 360px; height: 640px; }
-  .node[data-type="multichart"]{ width: 760px; height: 560px; }
+  .node[data-type="core"]{ width: 360px; }
+  .node[data-type="chart"]{ width: 360px; }
+  .node[data-type="multichart"]{ width: 520px; }
 
   .nodeHead{
     padding:10px 12px;
@@ -137,7 +133,6 @@
     cursor: grab;
   }
   .nodeHead:active{cursor:grabbing}
-
   .nodeTitle{ display:flex; align-items:center; gap:10px; min-width:0; }
   .chip{
     font-size:11px;
@@ -154,9 +149,8 @@
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
-    max-width: 240px;
+    max-width: 260px;
   }
-
   .nodeTools{ display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end; }
   .mini{
     border:1px solid rgba(79,155,255,.20);
@@ -171,13 +165,7 @@
   .mini:hover{border-color: rgba(79,155,255,.55)}
   .mini:active{transform: translateY(1px)}
 
-  .nodeBody{
-    padding:10px 12px 12px;
-    user-select:text;
-    height: calc(100% - 54px);
-    overflow:auto;
-  }
-
+  .nodeBody{ padding:10px 12px 12px; user-select:text; }
   .row{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
   .field{
     display:flex; flex-direction:column; gap:6px;
@@ -207,7 +195,6 @@
   .item a{color:var(--accent2); text-decoration:none}
   .item a:hover{text-decoration:underline}
   .item small{color:var(--muted)}
-
   .tags{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;}
   .tag{
     border:1px solid rgba(79,155,255,.18);
@@ -222,7 +209,6 @@
   .tag:hover{border-color: rgba(79,155,255,.55)}
   .tag:active{transform: translateY(1px)}
 
-  /* TradingView single chart box */
   .tvBox{
     margin-top:10px;
     border-radius:16px;
@@ -233,79 +219,6 @@
   .tvBox .tvInner{height: 420px; width:100%;}
   .node[data-type="core"] .tvBox .tvInner{height: 300px;}
 
-  /* MultiChart layout */
-  .multiWrap{
-    margin-top:10px;
-    border-radius:16px;
-    border:1px solid rgba(79,155,255,.18);
-    overflow:hidden;
-    background: rgba(0,0,0,.15);
-    height: 420px;
-    position:relative;
-  }
-  .node[data-type="multichart"] .multiWrap{ height: calc(100% - 160px); min-height: 360px; }
-
-  /* 2 small + 1 big + 1 ticker preset using CSS vars */
-  .multiGrid{
-    position:absolute; inset:0;
-    display:grid;
-    grid-template-columns: var(--mc-col, 70%) 1fr;
-    grid-template-rows: var(--mc-top, 45%) var(--mc-mid, 35%) 1fr;
-    grid-template-areas:
-      "big s1"
-      "big s2"
-      "tick tick";
-    gap: 10px;
-    padding: 10px;
-  }
-  .mcCell{
-    border-radius:14px;
-    border:1px solid rgba(79,155,255,.18);
-    overflow:hidden;
-    background: rgba(0,0,0,.12);
-    position:relative;
-  }
-  .mcCell .mcInner{ position:absolute; inset:0; }
-
-  .mcBig{ grid-area: big; }
-  .mcS1{ grid-area: s1; }
-  .mcS2{ grid-area: s2; }
-  .mcTick{ grid-area: tick; }
-
-  /* Gutters (internal resize handles) */
-  .gutter{
-    position:absolute;
-    z-index:40;
-    background: rgba(31,139,255,.08);
-    border:1px solid rgba(79,155,255,.18);
-    border-radius:12px;
-    backdrop-filter: blur(8px);
-    user-select:none;
-  }
-  .gutter:hover{ border-color: rgba(79,155,255,.55); background: rgba(31,139,255,.12); }
-  .gutter:active{ transform: translateY(1px); }
-
-  .gutter.vSplit{ /* between big & right column */
-    top:10px; bottom:10px;
-    width:14px;
-    left: calc(var(--mc-col, 70%) + 10px - 7px);
-    cursor: ew-resize;
-  }
-  .gutter.hTick{ /* between top area and ticker */
-    left:10px; right:10px;
-    height:14px;
-    top: calc(var(--mc-top, 45%) + var(--mc-mid, 35%) + 10px - 7px);
-    cursor: ns-resize;
-  }
-  .gutter.hRight{ /* between s1 and s2 (right column only) */
-    width: calc(100% - (var(--mc-col, 70%) + 30px));
-    left: calc(var(--mc-col, 70%) + 20px);
-    height:14px;
-    top: calc(var(--mc-top, 45%) + 10px - 7px);
-    cursor: ns-resize;
-  }
-
-  /* Floating tips */
   #toast{
     position:fixed;
     left:10px; bottom:10px;
@@ -322,24 +235,83 @@
   }
   #toast b{color:var(--accent2)}
 
-  /* ===== Node external resize handle ===== */
-  .nodeResizer{
-    position:absolute;
-    right:10px; bottom:10px;
-    width:18px; height:18px;
-    border-radius:8px;
-    border:1px solid rgba(79,155,255,.25);
-    background:
-      radial-gradient(8px 8px at 30% 30%, rgba(255,255,255,.14), transparent 60%),
-      linear-gradient(135deg, rgba(31,139,255,.30), rgba(74,195,255,.12));
-    box-shadow: 0 10px 24px rgba(0,0,0,.35);
-    cursor: nwse-resize;
-    z-index:25;
+  /* ========= Multi-Chart Layouts + Manual Resize ========= */
+  .mcWrap{ --splitX:.50; --splitY:.50; --big:.62; position:relative; margin-top:10px; }
+  .mcGrid{ display:grid; gap:10px; position:relative; height:520px; }
+  .mcGrid.layout-2x2{
+    grid-template-columns: calc(var(--splitX)*100%) calc((1 - var(--splitX))*100%);
+    grid-template-rows: calc(var(--splitY)*100%) calc((1 - var(--splitY))*100%);
   }
+  .mcGrid.layout-3-big-left{
+    grid-template-columns: calc(var(--big)*100%) calc((1 - var(--big))*100%);
+    grid-template-rows: 1fr 1fr;
+  }
+  .mcGrid.layout-3-big-left .mcCell.big{ grid-column:1; grid-row:1 / span 2; }
+  .mcGrid.layout-3-big-top{
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: calc(var(--big)*100%) calc((1 - var(--big))*100%);
+  }
+  .mcGrid.layout-3-big-top .mcCell.big{ grid-column:1 / span 2; grid-row:1; }
+  .mcGrid.layout-2-side{
+    grid-template-columns: calc(var(--splitX)*100%) calc((1 - var(--splitX))*100%);
+    grid-template-rows: 1fr;
+  }
+  .mcGrid.layout-2-stack{
+    grid-template-columns: 1fr;
+    grid-template-rows: calc(var(--splitY)*100%) calc((1 - var(--splitY))*100%);
+  }
+  .mcGrid.layout-1big-3strip{
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: calc(var(--big)*100%) calc((1 - var(--big))*100%);
+  }
+  .mcGrid.layout-1big-3strip .mcCell.big{ grid-column:1 / span 3; grid-row:1; }
+  .mcGrid.layout-1big-2right{
+    grid-template-columns: calc(var(--big)*100%) calc((1 - var(--big))*100%);
+    grid-template-rows: 1fr 1fr;
+  }
+  .mcGrid.layout-1big-2right .mcCell.big{ grid-column:1; grid-row:1 / span 2; }
 
-  /* Resize lock */
-  .node.resizeLocked .nodeResizer{ display:none; }
-  .node.resizeLocked .gutter{ pointer-events:none; opacity:.35; }
+  .mcCell{
+    border-radius:16px;
+    border:1px solid rgba(79,155,255,.18);
+    overflow:hidden;
+    background: rgba(0,0,0,.15);
+    display:flex;
+    flex-direction:column;
+    min-height: 160px;
+  }
+  .mcHead{
+    padding:8px 10px;
+    border-bottom:1px solid rgba(79,155,255,.14);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    background: rgba(10,18,40,.40);
+  }
+  .mcHead b{font-size:12px}
+  .mcHead small{color:var(--muted); font-size:11px}
+  .mcBody{flex:1; min-height:0;}
+  .mcBody > div{height:100%;}
+
+  .gutter{
+    position:absolute; z-index:20;
+    background: rgba(79,155,255,.10);
+    border:1px solid rgba(79,155,255,.18);
+    border-radius:999px;
+    backdrop-filter: blur(6px);
+  }
+  .gutter:hover{ background: rgba(79,155,255,.18); border-color: rgba(79,155,255,.35); }
+  .gutter.v{ width: 10px; cursor: col-resize; top: 6px; bottom: 6px; }
+  .gutter.h{ height: 10px; cursor: row-resize; left: 6px; right: 6px; }
+  .gutterDot{
+    position:absolute; left:50%; top:50%;
+    transform: translate(-50%,-50%);
+    width:22px; height:22px; border-radius:999px;
+    border:1px solid rgba(255,255,255,.10);
+    background: radial-gradient(8px 8px at 30% 30%, rgba(255,255,255,.18), transparent 60%),
+              linear-gradient(135deg, rgba(31,139,255,.35), rgba(74,195,255,.12));
+  }
 </style>
 </head>
 <body>
@@ -365,10 +337,8 @@
       <button class="btn" id="btnWorkspace">⚡ Apply</button>
     </div>
 
-    <button class="btn" id="btnResizeLock">🔓 Resize: ON</button>
-
-    <button class="btn good" id="btnAddMulti">➕ Multi</button>
     <button class="btn good" id="btnAddChart">➕ Chart</button>
+    <button class="btn good" id="btnAddMulti">➕ Multi-Chart</button>
     <button class="btn" id="btnAddNews">➕ News</button>
     <button class="btn" id="btnAddCal">➕ Calendar</button>
     <button class="btn" id="btnAddWatch">➕ Watchlist</button>
@@ -391,20 +361,12 @@
 </div>
 
 <div id="toast">
-  <b>Tips:</b> Arrastra header para mover. Esquina para <b>resize window</b>. Multi tiene gutters para resize interno.
-  Usa <b>🔓/🔒</b> para Lock/Unlock.
+  <b>Tips:</b> Arrastra el header del nodo. <b>＋</b> crea nodos hijos.
+  Multi-Chart tiene presets + resize manual. CORE puede <b>Sync All Charts</b>.
 </div>
 
 <script>
-/* =========================================================
-   Tech Blue Node Engine V1.3 (COMPLETE)
-   - MultiChart preset: 2 small + 1 big + 1 ticker
-   - Node window resize (external)
-   - Multi internal resize (gutters)
-   - Lock/Unlock resize (global)
-   - Multi from CORE (4H/1H/15M/1M)
-   - Watchlist, Snapshots, Strategy, Alerts, News/Calendar, Workspace
-========================================================= */
+
 
 const STORE_KEY = "techblue_node_engine_v1_3";
 
@@ -422,7 +384,7 @@ function centerOf(el){
   const r = el.getBoundingClientRect();
   return { x: r.left + r.width/2, y: r.top + r.height/2, w:r.width, h:r.height };
 }
-function intersects(a,b, pad=12){
+function intersects(a,b,pad=12){
   return !(
     a.x + a.w + pad < b.x ||
     a.x > b.x + b.w + pad ||
@@ -437,28 +399,24 @@ const Engine = {
   edges: [],
   z: 20,
   golden: 2.399963229728653,
-  alertTimers: new Map(),
-  resizeLocked: false
+  alertTimers: new Map()
 };
 
-/* Defaults */
 function defaultNodeState(type){
-  if(type==="core") return { title:"CORE", symbol:"OANDA:EURUSD", interval:"15" };
+  if(type==="core")  return { title:"CORE", symbol:"OANDA:EURUSD", interval:"15" };
   if(type==="chart") return { title:"Chart", symbol:"OANDA:EURUSD", interval:"60" };
 
   if(type==="multichart") return {
-    title:"Multi",
+    title:"Multi-Chart",
     symbol:"OANDA:EURUSD",
-    preset:"2small_1big_ticker",
-    // default cells 4H/1H/15M/1M
     cells:["240","60","15","1"],
-    // layout vars (percent)
-    mc_col: 70,     // big vs right column
-    mc_top: 45,     // right-top row height
-    mc_mid: 35      // right-mid row height (ticker uses remaining)
+    layout:"2x2",
+    splitX:0.52,
+    splitY:0.52,
+    big:0.62
   };
 
-  if(type==="news") return { title:"News", feed:"myfxbook_news", limit:10, filter:"" };
+  if(type==="news")  return { title:"News", feed:"myfxbook_news", limit:10, filter:"" };
   if(type==="calendar") return { title:"Calendar", feed:"myfxbook_calendar", limit:15, filter:"USD" };
   if(type==="notes") return { title:"Notes", text:"Ideas / plan / checklist…" };
 
@@ -484,9 +442,7 @@ function defaultNodeState(type){
   return { title:"Node" };
 }
 
-/* Helpers */
 function getNodeEl(id){ return document.querySelector(`.node[data-id="${id}"]`); }
-
 function syncNodeDOM(id){
   const m = Engine.nodes.get(id);
   const el = getNodeEl(id);
@@ -494,7 +450,6 @@ function syncNodeDOM(id){
   el.style.left = m.x + "px";
   el.style.top  = m.y + "px";
   el.style.width = m.w + "px";
-  el.style.height = m.h + "px";
 }
 
 function smartPlaceAroundParent(childId, parentId){
@@ -508,7 +463,6 @@ function smartPlaceAroundParent(childId, parentId){
 
   let radius = 40;
   let tries = 0;
-
   parent.angleIndex = (parent.angleIndex ?? 0) + 1;
   const baseAngle = parent.angleIndex * Engine.golden;
 
@@ -529,11 +483,11 @@ function smartPlaceAroundParent(childId, parentId){
     let ok = true;
     for(const [id, n] of Engine.nodes){
       if(id === childId) continue;
-      const r = {x:n.x,y:n.y,w:n.w,h:n.h};
-      if(intersects(candidate, r, 14)){ ok=false; break; }
+      if(intersects(candidate, {x:n.x,y:n.y,w:n.w,h:n.h}, 14)){ ok=false; break; }
     }
 
-    if(ok){ child.x = candidate.x; child.y = candidate.y; return; }
+    if(ok){ child.x=candidate.x; child.y=candidate.y; return; }
+
     tries++;
     if(tries % 10 === 0) radius += 55;
   }
@@ -542,15 +496,91 @@ function smartPlaceAroundParent(childId, parentId){
   child.y = clamp(parent.y, 64, sr.height - child.h - 10);
 }
 
-/* Render bodies */
+/* =========================================================
+   Node creation + Body renderer
+========================================================= */
+function createNode({type="notes", parentId=null, x=null, y=null, state=null}){
+  const id = uid();
+  const st = state ? {...defaultNodeState(type), ...state} : defaultNodeState(type);
+
+  let w =
+    (type==="core") ? 360 :
+    (type==="chart") ? 360 :
+    (type==="multichart") ? 520 :
+    320;
+
+  let h =
+    (type==="multichart") ? 720 :
+    (type==="chart") ? 620 :
+    (type==="news") ? 460 :
+    (type==="calendar") ? 480 :
+    (type==="watchlist") ? 420 :
+    (type==="snapshots") ? 460 :
+    (type==="strategy") ? 450 :
+    (type==="alerts") ? 520 :
+    320;
+
+  const nodeModel = { id, type, parentId, x:x ?? 100, y:y ?? 100, w, h, state:st, createdAt:Date.now(), angleIndex:0 };
+
+  const el = document.createElement("div");
+  el.className = "node";
+  el.dataset.id = id;
+  el.dataset.type = type;
+  el.style.width = w + "px";
+  el.style.zIndex = (++Engine.z).toString();
+
+  el.innerHTML = `
+    <div class="nodeHead" data-drag>
+      <div class="nodeTitle">
+        <span class="chip">${type.toUpperCase()}</span>
+        <b data-title>${safeText(st.title || type)}</b>
+      </div>
+      <div class="nodeTools">
+        <button class="mini" title="Crear nodo hijo" data-act="spawn">＋</button>
+        ${type==="core" ? "" : `<button class="mini" title="Traer al frente" data-act="front">⬆</button>`}
+        ${type==="core" ? "" : `<button class="mini" title="Eliminar" data-act="del">✕</button>`}
+      </div>
+    </div>
+    <div class="nodeBody">
+      ${renderBody(type, id, st)}
+    </div>
+  `;
+
+  $("#nodes").appendChild(el);
+  Engine.nodes.set(id, nodeModel);
+
+  if(parentId){
+    smartPlaceAroundParent(id, parentId);
+    Engine.edges.push({from: parentId, to: id});
+  }else{
+    const sr = stageRect();
+    nodeModel.x = clamp(nodeModel.x, 10, sr.width - w - 10);
+    nodeModel.y = clamp(nodeModel.y, 64, sr.height - h - 10);
+  }
+
+  syncNodeDOM(id);
+  bindNode(id);
+
+  // init
+  if(type==="chart" || type==="core") renderTradingViewWidgetSimple(id);
+  if(type==="multichart") { renderMultiChart(id); applyMultiLayout(id); bindMultiResize(id); }
+  if(type==="news" || type==="calendar") loadFeed(id);
+  if(type==="watchlist") renderWatchlistTags(id);
+  if(type==="snapshots") renderSnapshots(id);
+  if(type==="alerts") renderAlerts(id);
+
+  drawWires();
+  return id;
+}
+
 function renderBody(type, id, st){
   if(type==="core" || type==="chart"){
-    const isCore = (type==="core");
+    const isCore = type==="core";
     return `
       <div class="row">
         <div class="field">
           <label>Symbol (TradingView)</label>
-          <input data-k="symbol" value="${safeText(st.symbol)}" placeholder="OANDA:EURUSD, BINANCE:BTCUSDT...">
+          <input data-k="symbol" value="${safeText(st.symbol)}">
         </div>
         <div class="field">
           <label>Timeframe</label>
@@ -567,7 +597,7 @@ function renderBody(type, id, st){
         <button class="btn" style="padding:9px 10px;border-radius:14px" data-act="tvApply">🔄 Apply</button>
         <button class="btn" style="padding:9px 10px;border-radius:14px" data-act="spawnChartChild">＋ Spawn Chart Child</button>
         ${isCore ? `<button class="btn good" style="padding:9px 10px;border-radius:14px" data-act="syncAll">🧲 Sync All Charts</button>` : ``}
-        <span class="hint">${isCore ? "CORE recomienda par/timeframe y puede sincronizar todos los charts." : "Chart independiente."}</span>
+        <span class="hint">${isCore ? "CORE recomienda par/timeframe y sincroniza charts." : "Chart independiente."}</span>
       </div>
 
       <div class="tvBox">
@@ -577,61 +607,86 @@ function renderBody(type, id, st){
   }
 
   if(type==="multichart"){
-    const preset = st.preset || "2small_1big_ticker";
     const cells = Array.isArray(st.cells) ? st.cells : ["240","60","15","1"];
-    const tfOptions = ["1","5","15","30","60","240","D","W"];
-    const tfLabel = (v)=>({ "1":"1m","5":"5m","15":"15m","30":"30m","60":"1H","240":"4H","D":"1D","W":"1W" }[v]||v);
-
+    const labels = ["A","B","C","D"];
+    const layout = (st.layout || "2x2");
     return `
       <div class="row">
-        <div class="field" style="flex:2 1 220px">
+        <div class="field" style="flex:2 1 240px">
           <label>Symbol (TradingView)</label>
-          <input data-k="symbol" value="${safeText(st.symbol)}" placeholder="OANDA:EURUSD, BINANCE:BTCUSDT...">
+          <input data-k="symbol" value="${safeText(st.symbol)}">
         </div>
-        <div class="field">
-          <label>Preset</label>
-          <select data-k="preset">
-            <option value="2small_1big_ticker" ${preset==="2small_1big_ticker"?"selected":""}>2 small + 1 big + 1 ticker</option>
+        <div class="field" style="min-width:200px;flex:1 1 200px">
+          <label>Layout preset</label>
+          <select data-k="layout">
+            <option value="2x2" ${layout==="2x2"?"selected":""}>4 charts • 2x2</option>
+            <option value="3-big-left" ${layout==="3-big-left"?"selected":""}>3 charts • big left + 2 right</option>
+            <option value="3-big-top" ${layout==="3-big-top"?"selected":""}>3 charts • big top + 2 bottom</option>
+            <option value="2-side" ${layout==="2-side"?"selected":""}>2 charts • side by side</option>
+            <option value="2-stack" ${layout==="2-stack"?"selected":""}>2 charts • stacked</option>
+            <option value="1big-3strip" ${layout==="1big-3strip"?"selected":""}>1 big + 3 strip</option>
+            <option value="1big-2right" ${layout==="1big-2right"?"selected":""}>1 big + 2 right</option>
           </select>
         </div>
       </div>
 
       <div class="row" style="margin-top:8px">
-        <div class="field">
-          <label>BIG</label>
-          <select data-k="cell_0">${tfOptions.map(v=>`<option value="${v}" ${String(cells[0])===String(v)?"selected":""}>${tfLabel(v)}</option>`).join("")}</select>
-        </div>
-        <div class="field">
-          <label>SMALL 1</label>
-          <select data-k="cell_1">${tfOptions.map(v=>`<option value="${v}" ${String(cells[1])===String(v)?"selected":""}>${tfLabel(v)}</option>`).join("")}</select>
-        </div>
-        <div class="field">
-          <label>SMALL 2</label>
-          <select data-k="cell_2">${tfOptions.map(v=>`<option value="${v}" ${String(cells[2])===String(v)?"selected":""}>${tfLabel(v)}</option>`).join("")}</select>
-        </div>
-        <div class="field">
-          <label>TICKER</label>
-          <select data-k="cell_3">${tfOptions.map(v=>`<option value="${v}" ${String(cells[3])===String(v)?"selected":""}>${tfLabel(v)}</option>`).join("")}</select>
-        </div>
+        ${cells.map((v,i)=>`
+          <div class="field" style="min-width:120px;flex:1 1 120px">
+            <label>Cell ${labels[i]} TF</label>
+            <select data-k="cell_${i}">
+              ${["1","5","15","30","60","240","D","W"].map(opt=>{
+                const name = ({ "1":"1m","5":"5m","15":"15m","30":"30m","60":"1H","240":"4H","D":"1D","W":"1W" }[opt]||opt);
+                return `<option value="${opt}" ${String(v)===String(opt)?"selected":""}>${name}</option>`;
+              }).join("")}
+            </select>
+          </div>
+        `).join("")}
       </div>
 
       <div class="row" style="margin-top:8px">
-        <button class="btn" style="padding:9px 10px;border-radius:14px" data-act="multiApply">🔄 Apply Multi</button>
-        <button class="btn good" style="padding:9px 10px;border-radius:14px" data-act="multiFromCore">🧲 Multi from CORE (4H/1H/15M/1M)</button>
-        <button class="btn" style="padding:9px 10px;border-radius:14px" data-act="spawnMultiChild">＋ Spawn Multi Child</button>
-        <span class="hint">Gutters: ajusta tamaños internos. Esquina: resize ventana.</span>
+        <button class="btn" style="padding:9px 10px;border-radius:14px" data-act="multiApply">🔄 Apply</button>
+        <button class="btn good" style="padding:9px 10px;border-radius:14px" data-act="multiSpawnPack">📦 Spawn Pack (4 charts)</button>
+        <span class="hint">Arrastra las barras para resize. Se guarda tu layout.</span>
       </div>
 
-      <div class="multiWrap" id="mw_${id}">
-        <div class="multiGrid" id="mg_${id}">
-          <div class="mcCell mcBig"><div class="mcInner" id="mci_${id}_0"></div></div>
-          <div class="mcCell mcS1"><div class="mcInner" id="mci_${id}_1"></div></div>
-          <div class="mcCell mcS2"><div class="mcInner" id="mci_${id}_2"></div></div>
-          <div class="mcCell mcTick"><div class="mcInner" id="mci_${id}_3"></div></div>
+      <div class="mcWrap" id="mcWrap_${id}">
+        <div class="mcGrid layout-${safeText(layout)}" id="mcGrid_${id}">
+          <div class="mcCell big">
+            <div class="mcHead">
+              <div><b>A</b> <small id="mc_lbl_${id}_0">${safeText(String(cells[0]))}</small></div>
+              <button class="mini" data-act="mcSpawn" data-i="0">＋</button>
+            </div>
+            <div class="mcBody"><div id="tv_${id}_0"></div></div>
+          </div>
+
+          <div class="mcCell">
+            <div class="mcHead">
+              <div><b>B</b> <small id="mc_lbl_${id}_1">${safeText(String(cells[1]))}</small></div>
+              <button class="mini" data-act="mcSpawn" data-i="1">＋</button>
+            </div>
+            <div class="mcBody"><div id="tv_${id}_1"></div></div>
+          </div>
+
+          <div class="mcCell">
+            <div class="mcHead">
+              <div><b>C</b> <small id="mc_lbl_${id}_2">${safeText(String(cells[2]))}</small></div>
+              <button class="mini" data-act="mcSpawn" data-i="2">＋</button>
+            </div>
+            <div class="mcBody"><div id="tv_${id}_2"></div></div>
+          </div>
+
+          <div class="mcCell">
+            <div class="mcHead">
+              <div><b>D</b> <small id="mc_lbl_${id}_3">${safeText(String(cells[3]))}</small></div>
+              <button class="mini" data-act="mcSpawn" data-i="3">＋</button>
+            </div>
+            <div class="mcBody"><div id="tv_${id}_3"></div></div>
+          </div>
+
+          <div class="gutter v" id="mcGutV_${id}"><div class="gutterDot"></div></div>
+          <div class="gutter h" id="mcGutH_${id}"><div class="gutterDot"></div></div>
         </div>
-        <div class="gutter vSplit" data-gutter="v"></div>
-        <div class="gutter hRight" data-gutter="hr"></div>
-        <div class="gutter hTick" data-gutter="ht"></div>
       </div>
     `;
   }
@@ -643,8 +698,8 @@ function renderBody(type, id, st){
         <div class="field">
           <label>Feed</label>
           <select data-k="feed">
-            <option value="myfxbook_news" ${st.feed==="myfxbook_news"?"selected":""}>Myfxbook • Forex News (RSS)</option>
-            <option value="myfxbook_calendar" ${st.feed==="myfxbook_calendar"?"selected":""}>Myfxbook • Economic Calendar (RSS)</option>
+            <option value="myfxbook_news" ${st.feed==="myfxbook_news"?"selected":""}>Myfxbook • Forex News</option>
+            <option value="myfxbook_calendar" ${st.feed==="myfxbook_calendar"?"selected":""}>Myfxbook • Calendar</option>
           </select>
         </div>
         <div class="field">
@@ -658,7 +713,7 @@ function renderBody(type, id, st){
       <div class="row" style="margin-top:8px">
         <div class="field" style="flex:2 1 220px">
           <label>Filter (keyword)</label>
-          <input data-k="filter" value="${safeText(st.filter||"")}" placeholder="${isCal ? "USD, EUR, CPI, FOMC, NFP..." : "BTC, rate, inflation..."}">
+          <input data-k="filter" value="${safeText(st.filter||"")}" placeholder="${isCal ? "USD, EUR, CPI, FOMC..." : "BTC, rate, inflation..."}">
         </div>
         <button class="btn" style="padding:9px 10px;border-radius:14px; align-self:flex-end" data-act="feedRefresh">🔄 Refresh</button>
         <button class="btn" style="padding:9px 10px;border-radius:14px; align-self:flex-end" data-act="spawnFeedChild">＋ Spawn ${isCal?"Calendar":"News"} Child</button>
@@ -679,13 +734,13 @@ function renderBody(type, id, st){
 
       <div class="field" style="margin-top:8px">
         <label>Pares (uno por línea) — click crea Chart hijo</label>
-        <textarea data-k="items" placeholder="OANDA:EURUSD&#10;BINANCE:BTCUSDT">${safeText(st.items||"")}</textarea>
+        <textarea data-k="items">${safeText(st.items||"")}</textarea>
       </div>
 
       <div class="row" style="margin-top:8px">
         <button class="btn" style="padding:9px 10px;border-radius:14px" data-act="watchRender">🔄 Render</button>
         <button class="btn" style="padding:9px 10px;border-radius:14px" data-act="spawnWatchChild">＋ Spawn Watch Child</button>
-        <span class="hint">Tip: símbolos TradingView (OANDA:, BINANCE:, FX_IDC:).</span>
+        <span class="hint">Tip: OANDA:, BINANCE:, FX_IDC: etc.</span>
       </div>
 
       <div class="tags" id="watch_${id}"></div>
@@ -703,7 +758,7 @@ function renderBody(type, id, st){
       </div>
 
       <div class="row" style="margin-top:8px">
-        <button class="btn" style="padding:9px 10px;border-radius:14px" data-act="snapExport">⬇️ Export Snapshots</button>
+        <button class="btn" style="padding:9px 10px;border-radius:14px" data-act="snapExport">⬇️ Export</button>
         <button class="btn bad" style="padding:9px 10px;border-radius:14px" data-act="snapClear">🧹 Clear</button>
         <span class="hint">Guarda: symbol, timeframe, fecha, nota.</span>
       </div>
@@ -719,8 +774,8 @@ function renderBody(type, id, st){
           <label>Template</label>
           <select data-k="template">
             <option value="ema_smc" ${st.template==="ema_smc"?"selected":""}>EMA + SMC (tu estilo)</option>
-            <option value="liquidity_50" ${st.template==="liquidity_50"?"selected":""}>Market Structure + 50% + Liquidity Sweep</option>
-            <option value="scalp_pack" ${st.template==="scalp_pack"?"selected":""}>Scalp Pack (Multi + News + Notes + Alerts)</option>
+            <option value="liquidity_50" ${st.template==="liquidity_50"?"selected":""}>Structure + 50% + Liquidity Sweep</option>
+            <option value="scalp_pack" ${st.template==="scalp_pack"?"selected":""}>Scalp Pack</option>
           </select>
         </div>
         <div class="field">
@@ -775,23 +830,23 @@ function renderBody(type, id, st){
       <div class="row" style="margin-top:8px">
         <div class="field">
           <label>Crypto id (CoinGecko)</label>
-          <input data-k="symbol" value="${safeText(st.symbol||"bitcoin")}" placeholder="bitcoin, ethereum, solana...">
+          <input data-k="symbol" value="${safeText(st.symbol||"bitcoin")}">
         </div>
         <div class="field">
           <label>Manual price</label>
-          <input data-k="manualPrice" value="${safeText(st.manualPrice||"")}" placeholder="ej: 65000">
+          <input data-k="manualPrice" value="${safeText(st.manualPrice||"")}">
         </div>
       </div>
 
       <div class="row" style="margin-top:8px">
         <button class="btn" style="padding:9px 10px;border-radius:14px" data-act="alertAdd">➕ Add rule</button>
-        <button class="btn" style="padding:9px 10px;border-radius:14px" data-act="alertTest">🧪 Test notify</button>
+        <button class="btn" style="padding:9px 10px;border-radius:14px" data-act="alertTest">🧪 Test</button>
         <button class="btn warn" style="padding:9px 10px;border-radius:14px" data-act="alertRun">▶ Run</button>
         <button class="btn bad" style="padding:9px 10px;border-radius:14px" data-act="alertStop">⏹ Stop</button>
       </div>
 
       <div class="list" id="alerts_${id}"></div>
-      <div class="hint" style="margin-top:8px">Chrome: candado → Notifications (Allow)</div>
+      <div class="hint" style="margin-top:8px">Chrome: candado → Notifications → Allow</div>
     `;
   }
 
@@ -807,7 +862,7 @@ function renderBody(type, id, st){
       </div>
       <div class="row" style="margin-top:8px">
         <button class="btn" style="padding:9px 10px;border-radius:14px" data-act="spawnNoteChild">＋ Spawn Note Child</button>
-        <span class="hint">Checklist / journal / reglas.</span>
+        <span class="hint">Journal / checklist / reglas.</span>
       </div>
     `;
   }
@@ -815,91 +870,15 @@ function renderBody(type, id, st){
   return `<div class="hint">Nodo.</div>`;
 }
 
-/* Create node */
-function createNode({type="notes", parentId=null, x=null, y=null, state=null, idOverride=null}){
-  const id = idOverride || uid();
-  const st = state ? {...defaultNodeState(type), ...state} : defaultNodeState(type);
 
-  // sizes
-  let w = 320, h = 320;
-  if(type==="core"){ w=360; h=360; }
-  if(type==="chart"){ w=360; h=640; }
-  if(type==="multichart"){ w=760; h=560; }
-  if(type==="news"){ w=360; h=520; }
-  if(type==="calendar"){ w=360; h=520; }
-  if(type==="watchlist"){ w=360; h=460; }
-  if(type==="snapshots"){ w=360; h=520; }
-  if(type==="strategy"){ w=360; h=520; }
-  if(type==="alerts"){ w=360; h=560; }
-
-  const nodeModel = {
-    id, type, parentId,
-    x: x ?? 100, y: y ?? 100,
-    w, h,
-    state: st,
-    createdAt: Date.now(),
-    angleIndex: 0
-  };
-
-  const el = document.createElement("div");
-  el.className = "node";
-  el.dataset.id = id;
-  el.dataset.type = type;
-  el.style.zIndex = (++Engine.z).toString();
-  el.style.width = w + "px";
-  el.style.height = h + "px";
-
-  el.innerHTML = `
-    <div class="nodeHead" data-drag>
-      <div class="nodeTitle">
-        <span class="chip">${type.toUpperCase()}</span>
-        <b data-title>${safeText(st.title || type)}</b>
-      </div>
-      <div class="nodeTools">
-        <button class="mini" title="Crear nodo hijo" data-act="spawn">＋</button>
-        ${type==="core" ? "" : `<button class="mini" title="Front" data-act="front">⬆</button>`}
-        ${type==="core" ? "" : `<button class="mini" title="Eliminar" data-act="del">✕</button>`}
-      </div>
-    </div>
-    <div class="nodeBody">${renderBody(type, id, st)}</div>
-    <div class="nodeResizer" title="Resize window" data-resize></div>
-  `;
-
-  $("#nodes").appendChild(el);
-  Engine.nodes.set(id, nodeModel);
-
-  if(parentId){
-    smartPlaceAroundParent(id, parentId);
-    Engine.edges.push({from: parentId, to: id});
-  }else{
-    const sr = stageRect();
-    nodeModel.x = clamp(nodeModel.x, 10, sr.width - w - 10);
-    nodeModel.y = clamp(nodeModel.y, 64, sr.height - h - 10);
-  }
-
-  syncNodeDOM(id);
-  bindNode(id);
-
-  // init special
-  if(type==="chart" || type==="core") renderTradingViewWidgetSimple(id);
-  if(type==="multichart"){ applyMultiLayout(id); renderMultiChart(id); bindMultiResize(id); }
-  if(type==="news" || type==="calendar") loadFeed(id);
-  if(type==="watchlist") renderWatchlistTags(id);
-  if(type==="snapshots") renderSnapshots(id);
-  if(type==="alerts") renderAlerts(id);
-
-  applyResizeLockUI();
-  drawWires();
-  return id;
-}
-
-/* Pull inputs into state */
+/* =========================================================
+   Bind + State
+========================================================= */
 function pullFieldsIntoState(id){
   const el = getNodeEl(id);
   const m = Engine.nodes.get(id);
   if(!el || !m) return;
 
-  // generic k
   $$("[data-k]", el).forEach(inp=>{
     const k = inp.dataset.k;
     let v = inp.value;
@@ -909,20 +888,51 @@ function pullFieldsIntoState(id){
       if(k==="everySec") v = Number(v);
       if(k==="enabled") v = (String(v)==="true");
     }
+
+    // multichart cells
+    if(m.type==="multichart" && k.startsWith("cell_")){
+      const idx = Number(k.split("_")[1]);
+      const cells = Array.isArray(m.state.cells) ? m.state.cells.slice() : ["240","60","15","1"];
+      cells[idx] = String(v);
+      m.state.cells = cells;
+      return;
+    }
+
     m.state[k] = v;
   });
-
-  // multichart cells
-  if(m.type==="multichart"){
-    const c0 = el.querySelector('select[data-k="cell_0"]')?.value;
-    const c1 = el.querySelector('select[data-k="cell_1"]')?.value;
-    const c2 = el.querySelector('select[data-k="cell_2"]')?.value;
-    const c3 = el.querySelector('select[data-k="cell_3"]')?.value;
-    m.state.cells = [c0||"240", c1||"60", c2||"15", c3||"1"];
-  }
 }
 
-/* Bind node events */
+function spawnMenu(parentId){
+  const pick = prompt(
+`Crear nodo hijo:
+1 = Chart
+2 = Multi-Chart
+3 = News
+4 = Calendar
+5 = Notes
+6 = Watchlist
+7 = Snapshots
+8 = Strategy
+9 = Alerts
+
+Escribe 1-9:`
+  );
+  if(pick===null) return;
+  const p = pick.trim();
+  const map = { "1":"chart","2":"multichart","3":"news","4":"calendar","5":"notes","6":"watchlist","7":"snapshots","8":"strategy","9":"alerts" };
+  if(map[p]) return createNode({type:map[p], parentId});
+}
+
+function removeNode(id){
+  stopAlerts(id);
+  Engine.edges = Engine.edges.filter(e => e.from!==id && e.to!==id);
+  Engine.nodes.delete(id);
+  const el = getNodeEl(id);
+  if(el) el.remove();
+  drawWires();
+  saveAuto();
+}
+
 function bindNode(id){
   const el = getNodeEl(id);
   const m = Engine.nodes.get(id);
@@ -930,7 +940,6 @@ function bindNode(id){
 
   el.addEventListener("pointerdown", ()=>{ el.style.zIndex = (++Engine.z).toString(); });
 
-  // actions
   el.addEventListener("click", (e)=>{
     const btn = e.target.closest("[data-act]");
     if(!btn) return;
@@ -945,44 +954,6 @@ function bindNode(id){
     if(act==="spawnChartChild"){
       pullFieldsIntoState(id);
       createNode({type:"chart", parentId:id, state:{symbol:m.state.symbol, interval:m.state.interval, title:"Chart Child"}});
-      saveAuto(); return;
-    }
-
-    if(act==="multiApply"){
-      pullFieldsIntoState(id);
-      applyMultiLayout(id);
-      renderMultiChart(id);
-      bindMultiResize(id);
-      saveAuto();
-      return;
-    }
-
-    if(act==="multiFromCore"){
-      const coreId = getCoreIdOrNull();
-      if(!coreId) return alert("No CORE node found.");
-      const core = Engine.nodes.get(coreId);
-
-      m.state.symbol = (core.state.symbol || "OANDA:EURUSD").trim() || "OANDA:EURUSD";
-      m.state.cells = ["240","60","15","1"];
-
-      const symInp = el.querySelector('input[data-k="symbol"]');
-      if(symInp) symInp.value = m.state.symbol;
-
-      ["0","1","2","3"].forEach(i=>{
-        const sel = el.querySelector(`select[data-k="cell_${i}"]`);
-        if(sel) sel.value = m.state.cells[Number(i)];
-      });
-
-      applyMultiLayout(id);
-      renderMultiChart(id);
-      bindMultiResize(id);
-      saveAuto();
-      return;
-    }
-
-    if(act==="spawnMultiChild"){
-      pullFieldsIntoState(id);
-      createNode({type:"multichart", parentId:id, state:{title:"Multi Child", symbol:m.state.symbol, cells:m.state.cells}});
       saveAuto(); return;
     }
 
@@ -1009,18 +980,37 @@ function bindNode(id){
     if(act==="alertRun"){ pullFieldsIntoState(id); startAlerts(id); saveAuto(); return; }
     if(act==="alertStop"){ stopAlerts(id); saveAuto(); return; }
 
+    if(act==="multiApply"){ pullFieldsIntoState(id); renderMultiChart(id); applyMultiLayout(id); bindMultiResize(id); saveAuto(); return; }
+    if(act==="mcSpawn"){
+      pullFieldsIntoState(id);
+      const i = Number(btn.dataset.i);
+      const tf = (Engine.nodes.get(id)?.state?.cells?.[i] || "15");
+      const sym = (Engine.nodes.get(id)?.state?.symbol || "OANDA:EURUSD");
+      createNode({type:"chart", parentId:id, state:{title:`Cell ${"ABCD"[i]}`, symbol:sym, interval:String(tf)}});
+      saveAuto(); return;
+    }
+    if(act==="multiSpawnPack"){
+      pullFieldsIntoState(id);
+      const mm = Engine.nodes.get(id);
+      const sym = (mm.state.symbol || "OANDA:EURUSD");
+      const cells = getMultiCellsFromState(mm.state);
+      for(let i=0;i<4;i++){
+        createNode({type:"chart", parentId:id, state:{title:`Pack ${"ABCD"[i]}`, symbol:sym, interval:String(cells[i])}});
+      }
+      saveAuto(); return;
+    }
     if(act==="spawnNoteChild"){ pullFieldsIntoState(id); createNode({type:"notes", parentId:id, state:{title:"Notes Child", text:""}}); saveAuto(); return; }
   });
 
   // drag
   const head = el.querySelector("[data-drag]");
-  let dragging = false, sx=0, sy=0, ox=0, oy=0;
+  let dragging=false, sx=0, sy=0, ox=0, oy=0;
 
   head.addEventListener("pointerdown", (e)=>{
-    dragging = true;
+    dragging=true;
     head.setPointerCapture(e.pointerId);
-    sx = e.clientX; sy = e.clientY;
-    ox = m.x; oy = m.y;
+    sx=e.clientX; sy=e.clientY;
+    ox=m.x; oy=m.y;
   });
 
   head.addEventListener("pointermove", (e)=>{
@@ -1033,12 +1023,13 @@ function bindNode(id){
   });
 
   head.addEventListener("pointerup", (e)=>{
-    dragging = false;
+    dragging=false;
     try{ head.releasePointerCapture(e.pointerId); }catch(_){}
+    // refresh multichart after move (keeps gutters aligned)
+    if(m.type==="multichart"){ applyMultiLayout(id); }
     saveAuto();
   });
 
-  // change handlers
   el.addEventListener("change", (e)=>{
     if(!e.target.matches("input[data-k],select[data-k],textarea[data-k]")) return;
 
@@ -1048,101 +1039,20 @@ function bindNode(id){
     const titleEl = el.querySelector("[data-title]");
     if(titleEl) titleEl.textContent = nm.state.title || nm.type.toUpperCase();
 
-    if(nm.type === "chart" || nm.type === "core") renderTradingViewWidgetSimple(id);
-    if(nm.type === "multichart"){ applyMultiLayout(id); renderMultiChart(id); bindMultiResize(id); }
-    if(nm.type === "news" || nm.type === "calendar") loadFeed(id);
-    if(nm.type === "watchlist") renderWatchlistTags(id);
-    if(nm.type === "snapshots") renderSnapshots(id);
-    if(nm.type === "alerts") renderAlerts(id);
+    if(nm.type==="chart" || nm.type==="core") renderTradingViewWidgetSimple(id);
+    if(nm.type==="multichart"){ renderMultiChart(id); applyMultiLayout(id); bindMultiResize(id); }
+    if(nm.type==="news" || nm.type==="calendar") loadFeed(id);
+    if(nm.type==="watchlist") renderWatchlistTags(id);
+    if(nm.type==="snapshots") renderSnapshots(id);
+    if(nm.type==="alerts") renderAlerts(id);
 
     saveAuto();
   });
-
-  // ===== external node resize (window resize) =====
-  const resizer = el.querySelector("[data-resize]");
-  let resizing = false, rsx=0, rsy=0, rw=0, rh=0;
-
-  if(resizer){
-    resizer.addEventListener("pointerdown", (e)=>{
-      if(Engine.resizeLocked) return;
-      resizing = true;
-      el.style.zIndex = (++Engine.z).toString();
-      resizer.setPointerCapture(e.pointerId);
-      rsx = e.clientX; rsy = e.clientY;
-      rw = m.w; rh = m.h;
-      e.preventDefault();
-      e.stopPropagation();
-    });
-
-    resizer.addEventListener("pointermove", (e)=>{
-      if(!resizing) return;
-      const sr = stageRect();
-
-      const minW = 260;
-      const minH = (m.type==="multichart") ? 520 : 220;
-      const maxW = Math.max(minW, sr.width - 20);
-      const maxH = Math.max(minH, sr.height - 80);
-
-      m.w = clamp(rw + (e.clientX - rsx), minW, maxW);
-      m.h = clamp(rh + (e.clientY - rsy), minH, maxH);
-
-      el.style.width = m.w + "px";
-      el.style.height = m.h + "px";
-
-      m.x = clamp(m.x, 10, sr.width - m.w - 10);
-      m.y = clamp(m.y, 64, sr.height - m.h - 10);
-      syncNodeDOM(id);
-
-      drawWires();
-
-      if(m.type==="multichart"){
-        applyMultiLayout(id);
-      }
-    });
-
-    resizer.addEventListener("pointerup", (e)=>{
-      resizing = false;
-      try{ resizer.releasePointerCapture(e.pointerId); }catch(_){}
-
-      if(m.type==="multichart"){
-        renderMultiChart(id);
-        applyMultiLayout(id);
-        bindMultiResize(id);
-      }else if(m.type==="chart" || m.type==="core"){
-        renderTradingViewWidgetSimple(id);
-      }
-      saveAuto();
-    });
-  }
 }
 
-/* Spawn menu */
-function spawnMenu(parentId){
-  const pick = prompt(
-`Crear nodo hijo:
-1=Chart  2=Multi  3=News  4=Calendar
-5=Watchlist  6=Snapshots  7=Strategy  8=Alerts  9=Notes
-
-Escribe 1-9:`
-  );
-  if(pick===null) return;
-  const p = pick.trim();
-  const map = { "1":"chart","2":"multichart","3":"news","4":"calendar","5":"watchlist","6":"snapshots","7":"strategy","8":"alerts","9":"notes" };
-  if(map[p]) return createNode({type:map[p], parentId});
-}
-
-/* Remove node */
-function removeNode(id){
-  stopAlerts(id);
-  Engine.edges = Engine.edges.filter(e => e.from!==id && e.to!==id);
-  Engine.nodes.delete(id);
-  const el = getNodeEl(id);
-  if(el) el.remove();
-  drawWires();
-  saveAuto();
-}
-
-/* Wires */
+/* =========================================================
+   Wires
+========================================================= */
 function drawWires(){
   const svg = $("#wires");
   const sr = stageRect();
@@ -1176,14 +1086,12 @@ function drawWires(){
     const bx = (B.x - sr.left);
     const by = (B.y - sr.top);
 
-    const path = document.createElementNS("http://www.w3.org/2000/svg","path");
     const dx = Math.abs(bx-ax);
     const c1x = ax + dx * 0.35;
-    const c1y = ay;
     const c2x = bx - dx * 0.35;
-    const c2y = by;
 
-    path.setAttribute("d", `M ${ax} ${ay} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${bx} ${by}`);
+    const path = document.createElementNS("http://www.w3.org/2000/svg","path");
+    path.setAttribute("d", `M ${ax} ${ay} C ${c1x} ${ay}, ${c2x} ${by}, ${bx} ${by}`);
     path.setAttribute("fill","none");
     path.setAttribute("stroke","rgba(79,155,255,.45)");
     path.setAttribute("stroke-width","2");
@@ -1208,30 +1116,28 @@ window.addEventListener("resize", ()=>{
     syncNodeDOM(id);
   }
   drawWires();
+  // re-align multi gutters
+  for(const [id,m] of Engine.nodes){
+    if(m.type==="multichart") applyMultiLayout(id);
+  }
 });
 
-/* ===== TradingView (single) reliable render ===== */
-function renderTradingViewWidgetSimple(nodeId){
-  const m = Engine.nodes.get(nodeId);
-  if(!m) return;
-
-  const mount = document.getElementById("tv_" + nodeId);
+/* =========================================================
+   TradingView embed (single chart) + MultiChart cell embed
+========================================================= */
+function renderTradingViewWidgetInto(mount, symbol, interval){
   if(!mount) return;
 
   while(mount.firstChild) mount.removeChild(mount.firstChild);
-
   const inner = document.createElement("div");
-  inner.style.width = "100%";
-  inner.style.height = "100%";
+  inner.style.width="100%";
+  inner.style.height="100%";
   mount.appendChild(inner);
-
-  const interval = (m.state.interval ?? "60").toString().trim() || "60";
-  const symbol = (m.state.symbol || "OANDA:EURUSD").toString().trim() || "OANDA:EURUSD";
 
   const cfg = {
     autosize: true,
-    symbol,
-    interval,
+    symbol: (symbol||"OANDA:EURUSD").toString().trim() || "OANDA:EURUSD",
+    interval: (interval||"60").toString().trim() || "60",
     timezone: "Etc/UTC",
     theme: "dark",
     style: "1",
@@ -1254,240 +1160,181 @@ function renderTradingViewWidgetSimple(nodeId){
   requestAnimationFrame(()=> inner.appendChild(script));
 }
 
-/* ===== MultiChart: apply preset layout vars ===== */
-function applyMultiLayout(nodeId){
+function renderTradingViewWidgetSimple(nodeId){
   const m = Engine.nodes.get(nodeId);
-  const grid = document.getElementById("mg_" + nodeId);
-  if(!m || !grid) return;
-
-  const col = clamp(Number(m.state.mc_col ?? 70), 40, 85);
-  const top = clamp(Number(m.state.mc_top ?? 45), 20, 70);
-  const mid = clamp(Number(m.state.mc_mid ?? 35), 10, 60);
-  const sum = top + mid;
-  const topN = clamp(top, 20, 80);
-  const midN = clamp(mid, 10, 70);
-  const tickN = clamp(100 - sum, 12, 50);
-
-  grid.style.setProperty("--mc-col", col + "%");
-  grid.style.setProperty("--mc-top", topN + "%");
-  grid.style.setProperty("--mc-mid", midN + "%");
-
-  // also update gutter positions (they reference vars)
+  if(!m) return;
+  const mount = document.getElementById("tv_" + nodeId);
+  if(!mount) return;
+  renderTradingViewWidgetInto(mount, m.state.symbol, m.state.interval);
 }
 
-/* ===== MultiChart: render 4 embedded charts ===== */
+/* Multi-Chart helpers */
+function getMultiCellsFromState(st){
+  const base = Array.isArray(st.cells) ? st.cells.slice(0,4) : ["240","60","15","1"];
+  while(base.length<4) base.push("15");
+  return base.map(v=>String(v||"15"));
+}
 function renderMultiChart(nodeId){
   const m = Engine.nodes.get(nodeId);
   if(!m) return;
 
-  const symbol = (m.state.symbol || "OANDA:EURUSD").toString().trim() || "OANDA:EURUSD";
-  const cells = Array.isArray(m.state.cells) ? m.state.cells : ["240","60","15","1"];
+  const sym = (m.state.symbol || "OANDA:EURUSD").toString().trim() || "OANDA:EURUSD";
+  const cells = getMultiCellsFromState(m.state);
+  m.state.cells = cells;
 
   for(let i=0;i<4;i++){
-    const inner = document.getElementById(`mci_${nodeId}_${i}`);
-    if(!inner) continue;
-
-    // strong rebuild
-    while(inner.firstChild) inner.removeChild(inner.firstChild);
-
-    const wrap = document.createElement("div");
-    wrap.style.width = "100%";
-    wrap.style.height = "100%";
-    inner.appendChild(wrap);
-
-    const interval = (cells[i] ?? "60").toString().trim() || "60";
-    const cfg = {
-      autosize: true,
-      symbol,
-      interval,
-      timezone: "Etc/UTC",
-      theme: "dark",
-      style: "1",
-      locale: "en",
-      enable_publishing: false,
-      hide_top_toolbar: false,
-      hide_legend: true,
-      allow_symbol_change: false,
-      save_image: true,
-      calendar: true,
-      support_host: "https://www.tradingview.com"
-    };
-
-    const script = document.createElement("script");
-    script.type = "text/javascript";
-    script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
-    script.async = true;
-    script.text = JSON.stringify(cfg);
-
-    requestAnimationFrame(()=> wrap.appendChild(script));
+    const mount = document.getElementById(`tv_${nodeId}_${i}`);
+    if(mount) renderTradingViewWidgetInto(mount, sym, cells[i]);
+    const lbl = document.getElementById(`mc_lbl_${nodeId}_${i}`);
+    if(lbl) lbl.textContent = String(cells[i]);
   }
 }
 
-/* ===== MultiChart internal resize (gutters) ===== */
+/* Multi layout apply + gutters */
+function applyMultiLayout(nodeId){
+  const m = Engine.nodes.get(nodeId);
+  const wrap = document.getElementById(`mcWrap_${nodeId}`);
+  const grid = document.getElementById(`mcGrid_${nodeId}`);
+  const gutV = document.getElementById(`mcGutV_${nodeId}`);
+  const gutH = document.getElementById(`mcGutH_${nodeId}`);
+  if(!m || !wrap || !grid || !gutV || !gutH) return;
+
+  const sx  = clamp(Number(m.state.splitX ?? 0.52), 0.15, 0.85);
+  const sy  = clamp(Number(m.state.splitY ?? 0.52), 0.15, 0.85);
+  const big = clamp(Number(m.state.big ?? 0.62), 0.45, 0.80);
+
+  wrap.style.setProperty("--splitX", sx);
+  wrap.style.setProperty("--splitY", sy);
+  wrap.style.setProperty("--big", big);
+
+  const layout = (m.state.layout || "2x2");
+  grid.className = `mcGrid layout-${layout}`;
+
+  const cells = Array.from(grid.querySelectorAll(".mcCell"));
+  const show = (idx, yes)=>{ if(cells[idx]) cells[idx].style.display = yes ? "" : "none"; };
+
+  // defaults
+  show(0,true); show(1,true); show(2,true); show(3,true);
+  gutV.style.display="none";
+  gutH.style.display="none";
+
+  const rect = grid.getBoundingClientRect();
+  const setV = (ratio)=>{ gutV.style.left = (rect.width * ratio - 5) + "px"; };
+  const setH = (ratio)=>{ gutH.style.top  = (rect.height * ratio - 5) + "px"; };
+
+  if(layout==="2x2"){ gutV.style.display=""; gutH.style.display=""; setV(sx); setH(sy); }
+  else if(layout==="2-side"){ show(2,false); show(3,false); gutV.style.display=""; setV(sx); }
+  else if(layout==="2-stack"){ show(2,false); show(3,false); gutH.style.display=""; setH(sy); }
+  else if(layout==="3-big-left"){ show(3,false); gutV.style.display=""; setV(big); }
+  else if(layout==="3-big-top"){ show(3,false); gutH.style.display=""; setH(big); }
+  else if(layout==="1big-2right"){ show(3,false); gutV.style.display=""; setV(big); }
+  // 1big-3strip has no gutters (optional)
+}
+
 function bindMultiResize(nodeId){
   const m = Engine.nodes.get(nodeId);
-  const wrap = document.getElementById("mw_" + nodeId);
-  const grid = document.getElementById("mg_" + nodeId);
-  if(!m || !wrap || !grid) return;
+  const grid = document.getElementById(`mcGrid_${nodeId}`);
+  const gutV = document.getElementById(`mcGutV_${nodeId}`);
+  const gutH = document.getElementById(`mcGutH_${nodeId}`);
+  if(!m || !grid || !gutV || !gutH) return;
 
-  const gutV = wrap.querySelector('.gutter[data-gutter="v"]');
-  const gutHR = wrap.querySelector('.gutter[data-gutter="hr"]');
-  const gutHT = wrap.querySelector('.gutter[data-gutter="ht"]');
+  // prevent double binding
+  if(gutV.dataset.bound==="1" && gutH.dataset.bound==="1") return;
+  gutV.dataset.bound="1";
+  gutH.dataset.bound="1";
 
-  const setVars = (col, top, mid)=>{
-    m.state.mc_col = clamp(col, 40, 85);
-    m.state.mc_top = clamp(top, 20, 70);
-    m.state.mc_mid = clamp(mid, 10, 60);
-    applyMultiLayout(nodeId);
-    saveAuto();
+  const drag = (gut, axis)=>{
+    let dragging=false, start=0, startVal=0, rect=null, layout=null;
+
+    gut.addEventListener("pointerdown", (e)=>{
+      dragging=true;
+      gut.setPointerCapture(e.pointerId);
+      rect = grid.getBoundingClientRect();
+      layout = (m.state.layout || "2x2");
+      start = axis==="x" ? e.clientX : e.clientY;
+
+      if(layout==="3-big-left" || layout==="3-big-top" || layout==="1big-2right"){
+        startVal = Number(m.state.big ?? 0.62);
+      }else{
+        startVal = axis==="x" ? Number(m.state.splitX ?? 0.52) : Number(m.state.splitY ?? 0.52);
+      }
+    });
+
+    gut.addEventListener("pointermove", (e)=>{
+      if(!dragging) return;
+      const cur = axis==="x" ? e.clientX : e.clientY;
+      const delta = cur - start;
+      const size = axis==="x" ? rect.width : rect.height;
+
+      let ratio = clamp(startVal + (delta / size), 0.15, 0.85);
+
+      if(layout==="3-big-left" || layout==="3-big-top" || layout==="1big-2right"){
+        m.state.big = clamp(ratio, 0.45, 0.80);
+      }else{
+        if(axis==="x") m.state.splitX = ratio;
+        else m.state.splitY = ratio;
+      }
+
+      applyMultiLayout(nodeId);
+      saveAuto();
+    });
+
+    gut.addEventListener("pointerup", (e)=>{
+      dragging=false;
+      try{ gut.releasePointerCapture(e.pointerId); }catch(_){}
+      // after resize, re-render charts so they fit perfect
+      renderMultiChart(nodeId);
+      applyMultiLayout(nodeId);
+      saveAuto();
+    });
   };
 
-  function pxToPctX(px){
-    const r = wrap.getBoundingClientRect();
-    const usable = r.width - 20; // padding 10+10
-    return clamp((px / usable) * 100, 40, 85);
-  }
-  function pxToPctY(px){
-    const r = wrap.getBoundingClientRect();
-    const usable = r.height - 20;
-    return clamp((px / usable) * 100, 12, 88);
-  }
-
-  // Vertical split: change mc_col
-  if(gutV){
-    let active=false, sx=0, startCol=70;
-    gutV.onpointerdown = (e)=>{
-      if(Engine.resizeLocked) return;
-      active=true;
-      gutV.setPointerCapture(e.pointerId);
-      sx = e.clientX;
-      startCol = Number(m.state.mc_col ?? 70);
-      e.preventDefault();
-    };
-    gutV.onpointermove = (e)=>{
-      if(!active) return;
-      const r = wrap.getBoundingClientRect();
-      const delta = e.clientX - r.left - 10; // inside padding
-      const colPct = pxToPctX(delta);
-      setVars(colPct, Number(m.state.mc_top ?? 45), Number(m.state.mc_mid ?? 35));
-    };
-    gutV.onpointerup = (e)=>{
-      active=false;
-      try{ gutV.releasePointerCapture(e.pointerId); }catch(_){}
-      // optional: rerender charts for perfect fit (light debounce)
-      debounceMultiRerender(nodeId);
-    };
-  }
-
-  // Right column horizontal split between s1 and s2: change mc_top/mc_mid proportion
-  if(gutHR){
-    let active=false;
-    gutHR.onpointerdown = (e)=>{
-      if(Engine.resizeLocked) return;
-      active=true;
-      gutHR.setPointerCapture(e.pointerId);
-      e.preventDefault();
-    };
-    gutHR.onpointermove = (e)=>{
-      if(!active) return;
-      const r = wrap.getBoundingClientRect();
-      const y = e.clientY - r.top - 10; // inside padding
-      const topPct = clamp(pxToPctY(y), 18, 75);
-      // keep ticker zone in mind later via hTick
-      const mid = Number(m.state.mc_mid ?? 35);
-      // adjust top only
-      setVars(Number(m.state.mc_col ?? 70), topPct, mid);
-    };
-    gutHR.onpointerup = (e)=>{
-      active=false;
-      try{ gutHR.releasePointerCapture(e.pointerId); }catch(_){}
-      debounceMultiRerender(nodeId);
-    };
-  }
-
-  // Ticker split: change total top+mid so ticker height changes (we edit mc_mid keeping top)
-  if(gutHT){
-    let active=false;
-    gutHT.onpointerdown = (e)=>{
-      if(Engine.resizeLocked) return;
-      active=true;
-      gutHT.setPointerCapture(e.pointerId);
-      e.preventDefault();
-    };
-    gutHT.onpointermove = (e)=>{
-      if(!active) return;
-      const r = wrap.getBoundingClientRect();
-      const y = e.clientY - r.top - 10;
-      const totalPct = clamp(pxToPctY(y), 45, 88); // top+mid
-      const top = Number(m.state.mc_top ?? 45);
-      const mid = clamp(totalPct - top, 10, 70);
-      setVars(Number(m.state.mc_col ?? 70), top, mid);
-    };
-    gutHT.onpointerup = (e)=>{
-      active=false;
-      try{ gutHT.releasePointerCapture(e.pointerId); }catch(_){}
-      debounceMultiRerender(nodeId);
-    };
-  }
+  drag(gutV, "x");
+  drag(gutH, "y");
 }
 
-let _multiDebounce = new Map();
-function debounceMultiRerender(nodeId){
-  if(_multiDebounce.has(nodeId)) clearTimeout(_multiDebounce.get(nodeId));
-  _multiDebounce.set(nodeId, setTimeout(()=>{
-    renderMultiChart(nodeId);
-  }, 260));
-}
-
-/* CORE helpers */
+/* CORE -> Sync all charts + multicharts */
 function getCoreIdOrNull(){
   for(const [id, n] of Engine.nodes){ if(n.type==="core") return id; }
   return null;
 }
-function coreStateHint(){
-  const coreId = getCoreIdOrNull();
-  if(!coreId) return {};
-  const core = Engine.nodes.get(coreId);
-  return { symbol: core.state.symbol, interval: core.state.interval };
-}
 function syncAllChartsFromCore(coreId){
   const core = Engine.nodes.get(coreId);
   if(!core) return;
+
   const sym = (core.state.symbol||"").trim();
   const tf  = (core.state.interval||"").toString().trim();
 
   for(const [id, n] of Engine.nodes){
-    if(n.type !== "chart") continue;
-    n.state.symbol = sym;
-    n.state.interval = tf;
-
-    const el = getNodeEl(id);
-    if(el){
-      const symInp = el.querySelector('input[data-k="symbol"]');
-      const tfSel  = el.querySelector('select[data-k="interval"]');
-      if(symInp) symInp.value = sym;
-      if(tfSel) tfSel.value = tf;
+    if(n.type==="chart"){
+      n.state.symbol = sym;
+      n.state.interval = tf;
+      const el = getNodeEl(id);
+      if(el){
+        const symInp = el.querySelector('input[data-k="symbol"]');
+        const tfSel  = el.querySelector('select[data-k="interval"]');
+        if(symInp) symInp.value = sym;
+        if(tfSel) tfSel.value = tf;
+      }
+      renderTradingViewWidgetSimple(id);
     }
-    renderTradingViewWidgetSimple(id);
+    if(n.type==="multichart"){
+      n.state.symbol = sym;
+      // keep its own cells, but refresh
+      const el = getNodeEl(id);
+      if(el){
+        const symInp = el.querySelector('input[data-k="symbol"]');
+        if(symInp) symInp.value = sym;
+      }
+      renderMultiChart(id);
+      applyMultiLayout(id);
+    }
   }
 }
 
-/* Lock UI */
-function applyResizeLockUI(){
-  const btn = $("#btnResizeLock");
-  if(btn) btn.textContent = Engine.resizeLocked ? "🔒 Resize: OFF" : "🔓 Resize: ON";
-
-  for(const [id] of Engine.nodes){
-    const el = getNodeEl(id);
-    if(!el) continue;
-    if(Engine.resizeLocked) el.classList.add("resizeLocked");
-    else el.classList.remove("resizeLocked");
-  }
-}
-
-/* Done Part 2 */
-
-/* Feeds */
+/* =========================================================
+   Feed (News/Calendar) with filter
+========================================================= */
 const FEEDS = {
   myfxbook_news: "https://www.myfxbook.com/rss/latest-forex-news",
   myfxbook_calendar: "https://www.myfxbook.com/rss/forex-economic-calendar-events"
@@ -1518,6 +1365,7 @@ async function loadFeed(nodeId){
     }
 
     items = items.slice(0, limit);
+
     if(!items.length){
       box.innerHTML = `<div class="item"><small>No hay items con ese filtro.</small></div>`;
       return;
@@ -1546,19 +1394,19 @@ async function loadFeed(nodeId){
       <div class="item">
         <div style="font-weight:650">Error cargando RSS</div>
         <div class="hint">${safeText(String(err))}</div>
-        <div class="hint" style="margin-top:6px">Tip: si el proxy o feed se cae, luego cambiamos fuente.</div>
       </div>
     `;
   }
 }
 
-/* Watchlist */
+/* =========================================================
+   Watchlist
+========================================================= */
 function guessTimeframeFromCore(){
   const coreId = getCoreIdOrNull();
   if(!coreId) return "15";
   return Engine.nodes.get(coreId)?.state?.interval?.toString() || "15";
 }
-
 function renderWatchlistTags(nodeId){
   const m = Engine.nodes.get(nodeId);
   const box = document.getElementById("watch_" + nodeId);
@@ -1570,19 +1418,21 @@ function renderWatchlistTags(nodeId){
     return;
   }
 
-  box.innerHTML = items.map(sym=>`<button class="tag" data-sym="${safeText(sym)}" title="Crear chart hijo">${safeText(sym)}</button>`).join("");
+  box.innerHTML = items.map(sym=>`<button class="tag" data-sym="${safeText(sym)}">${safeText(sym)}</button>`).join("");
 
   box.onclick = (e)=>{
     const btn = e.target.closest(".tag[data-sym]");
     if(!btn) return;
     const sym = btn.dataset.sym;
-    const tf = guessTimeframeFromCore() || "15";
+    const tf = guessTimeframeFromCore();
     createNode({type:"chart", parentId: nodeId, state:{title:sym, symbol:sym, interval:tf}});
     saveAuto();
   };
 }
 
-/* Snapshots */
+/* =========================================================
+   Snapshots
+========================================================= */
 function saveSnapshot(snapNodeId){
   const snapNode = Engine.nodes.get(snapNodeId);
   if(!snapNode) return;
@@ -1590,20 +1440,21 @@ function saveSnapshot(snapNodeId){
   const noteEl = document.getElementById("snapNote_" + snapNodeId);
   const note = (noteEl?.value || "").trim();
 
-  let sym = "";
-  let tf  = "";
+  let sym = "—";
+  let tf  = "—";
+
   const coreId = getCoreIdOrNull();
   if(coreId){
     const c = Engine.nodes.get(coreId);
-    sym = (c.state.symbol||"").trim();
-    tf  = (c.state.interval||"").toString().trim();
+    sym = (c.state.symbol||"—").trim();
+    tf  = (c.state.interval||"—").toString().trim();
   }else{
     for(const [id,n] of Engine.nodes){
-      if(n.type==="chart"){ sym=(n.state.symbol||"").trim(); tf=(n.state.interval||"").toString().trim(); break; }
+      if(n.type==="chart"){ sym=(n.state.symbol||"—").trim(); tf=(n.state.interval||"—").toString().trim(); break; }
     }
   }
 
-  const entry = { at: nowISO(), symbol: sym || "—", interval: tf || "—", note };
+  const entry = { at: nowISO(), symbol:sym, interval:tf, note };
   snapNode.state.list = Array.isArray(snapNode.state.list) ? snapNode.state.list : [];
   snapNode.state.list.unshift(entry);
 
@@ -1637,6 +1488,7 @@ function renderSnapshots(snapNodeId){
   box.onclick = (e)=>{
     const openBtn = e.target.closest('[data-act="snapOpen"]');
     const delBtn  = e.target.closest('[data-act="snapDel"]');
+
     if(openBtn){
       const i = Number(openBtn.dataset.idx);
       const s = list[i];
@@ -1667,18 +1519,20 @@ function exportSnapshots(snapNodeId){
   setTimeout(()=>URL.revokeObjectURL(a.href), 1500);
 }
 
-/* Strategy */
+/* =========================================================
+   Strategy templates
+========================================================= */
 function runStrategy(nodeId){
   const m = Engine.nodes.get(nodeId);
   if(!m) return;
 
-  const tf = guessTimeframeFromCore() || "15";
+  const tf = guessTimeframeFromCore();
   const coreId = getCoreIdOrNull();
   const coreSym = coreId ? (Engine.nodes.get(coreId).state.symbol||"OANDA:EURUSD") : "OANDA:EURUSD";
   const tpl = m.state.template;
 
   if(tpl === "ema_smc"){
-    createNode({type:"multichart", parentId:nodeId, state:{title:"Multi (HTF->LTF)", symbol:coreSym, cells:["240","60","15","1"]}});
+    createNode({type:"multichart", parentId:nodeId, state:{title:"Multi (HTF→LTF)", symbol:coreSym, cells:["240","60","15","1"], layout:"1big-2right"}});
     createNode({type:"notes", parentId:nodeId, state:{title:"Rules", text:
 `EMA Trend Filter:
 - 13 EMA vs 50 EMA define tendencia
@@ -1686,30 +1540,29 @@ Entrada 1m:
 - EMA3 cruza EMA7 a favor HTF
 - Rechazo en EMA50 + confirmación
 SMC:
-- Barrido de liquidez
-- Retest Order Block
-- BOS a favor
+- Barrido de liquidez / OB / BOS
 RSI:
-- Compra >50 subiendo
-- Venta <50 bajando`}});
-    createNode({type:"news", parentId:nodeId, state:{title:"News (USD)", feed:"myfxbook_news", limit:10, filter:"USD"}});
-  }
-  else if(tpl === "liquidity_50"){
-    createNode({type:"multichart", parentId:nodeId, state:{title:"Structure Pack", symbol:coreSym, cells:["240","60","15","1"]}});
-    createNode({type:"notes", parentId:nodeId, state:{title:"Plan 50% + Liquidity", text:
-`1) Marcar alto/bajo del impulso
-2) Marcar 50% del movimiento
-3) Esperar retroceso a 50%
-4) Esperar barrido de liquidez (arriba/abajo)
-5) Reingreso a la zona -> entrada hacia 50%
-SL: más allá del último high/low (incluye mechas)`}});
+- Compra >50 subiendo, Venta <50 bajando
+`}});
+    createNode({type:"news", parentId:nodeId, state:{title:"News USD", feed:"myfxbook_news", limit:10, filter:"USD"}});
     createNode({type:"calendar", parentId:nodeId, state:{title:"Calendar USD", feed:"myfxbook_calendar", limit:15, filter:"USD"}});
   }
+  else if(tpl === "liquidity_50"){
+    createNode({type:"multichart", parentId:nodeId, state:{title:"Structure Pack", symbol:coreSym, cells:["240","60","15","1"], layout:"1big-3strip"}});
+    createNode({type:"notes", parentId:nodeId, state:{title:"Plan 50% + Liquidity", text:
+`1) Marcar alto/bajo del impulso
+2) Marcar 50%
+3) Esperar retroceso a 50%
+4) Barrido de liquidez
+5) Reingreso -> entrada hacia 50%
+SL: más allá del último high/low (incluye mechas)
+`}});
+    createNode({type:"calendar", parentId:nodeId, state:{title:"Calendar", feed:"myfxbook_calendar", limit:15, filter:"USD"}});
+  }
   else if(tpl === "scalp_pack"){
-    createNode({type:"multichart", parentId:nodeId, state:{title:"Scalp Multi", symbol:coreSym, cells:["60","15","5","1"]}});
+    createNode({type:"multichart", parentId:nodeId, state:{title:"Scalp Pack", symbol:coreSym, cells:["60","15","5","1"], layout:"2x2"}});
+    createNode({type:"alerts", parentId:nodeId, state:{title:"Alerts", enabled:false}});
     createNode({type:"news", parentId:nodeId, state:{title:"Hot News", feed:"myfxbook_news", limit:10, filter:"rate"}});
-    createNode({type:"alerts", parentId:nodeId, state:{title:"Alerts", enabled:false, mode:"crypto", symbol:"bitcoin", everySec:15}});
-    createNode({type:"notes", parentId:nodeId, state:{title:"Scalp Notes", text:"Setup / rules / risk…"}});
   }
 
   m.state.lastRun = `Generated @ ${nowISO()} — template: ${tpl}`;
@@ -1717,24 +1570,20 @@ SL: más allá del último high/low (incluye mechas)`}});
   if(last) last.textContent = m.state.lastRun;
 }
 
-/* Alerts */
+/* =========================================================
+   Alerts (local)
+========================================================= */
 function testNotify(title, body){
-  if(!("Notification" in window)){
-    alert("Este navegador no soporta Notification API.");
-    return;
-  }
-  if(Notification.permission === "granted"){
-    new Notification(title, {body});
-    return;
-  }
+  if(!("Notification" in window)){ alert("Este navegador no soporta Notification API."); return; }
+  if(Notification.permission === "granted"){ new Notification(title, {body}); return; }
   if(Notification.permission !== "denied"){
     Notification.requestPermission().then(p=>{
       if(p==="granted") new Notification(title, {body});
-      else alert("Permiso de notificaciones denegado.");
+      else alert("Permiso denegado.");
     });
     return;
   }
-  alert("Notificaciones están bloqueadas. (Chrome: candado → Notifications)");
+  alert("Notificaciones bloqueadas. (Chrome: candado → Notifications)");
 }
 
 function renderAlerts(nodeId){
@@ -1849,10 +1698,7 @@ function startAlerts(nodeId){
   }
 
   const every = Math.max(5, Number(m.state.everySec || 15));
-  const timer = setInterval(()=>{
-    evalAlertsOnce(nodeId).catch(()=>{});
-  }, every * 1000);
-
+  const timer = setInterval(()=>{ evalAlertsOnce(nodeId).catch(()=>{}); }, every * 1000);
   Engine.alertTimers.set(nodeId, timer);
   renderAlerts(nodeId);
 }
@@ -1864,12 +1710,13 @@ function stopAlerts(nodeId){
   if(m && m.type==="alerts") renderAlerts(nodeId);
 }
 
-/* Save/Load */
+/* =========================================================
+   Save / Load / Export / Import
+========================================================= */
 function snapshot(){
   return {
     version: 13,
     savedAt: nowISO(),
-    resizeLocked: !!Engine.resizeLocked,
     nodes: Array.from(Engine.nodes.values()).map(n=>({
       id:n.id, type:n.type, parentId:n.parentId,
       x:n.x,y:n.y,w:n.w,h:n.h,
@@ -1891,28 +1738,26 @@ function applySnapshot(data){
   const byId = new Map();
 
   for(const n of (data.nodes||[])){
+    const id = n.id;
     const model = {
-      id:n.id,
+      id,
       type:n.type,
       parentId:n.parentId ?? null,
       x:n.x ?? 100, y:n.y ?? 100,
-      w:n.w ?? 320, h:n.h ?? 320,
+      w:n.w ?? 320, h:n.h ?? 300,
       state: {...defaultNodeState(n.type), ...(n.state||{})},
       createdAt: Date.now(),
       angleIndex: n.angleIndex || 0,
     };
+    Engine.nodes.set(id, model);
+    byId.set(id, true);
 
-    Engine.nodes.set(model.id, model);
-    byId.set(model.id, true);
-
-    // Build DOM using createNode-like html, but with stored id
     const el = document.createElement("div");
     el.className = "node";
-    el.dataset.id = model.id;
+    el.dataset.id = id;
     el.dataset.type = model.type;
-    el.style.zIndex = (++Engine.z).toString();
     el.style.width = model.w + "px";
-    el.style.height = model.h + "px";
+    el.style.zIndex = (++Engine.z).toString();
 
     el.innerHTML = `
       <div class="nodeHead" data-drag>
@@ -1922,34 +1767,30 @@ function applySnapshot(data){
         </div>
         <div class="nodeTools">
           <button class="mini" title="Crear nodo hijo" data-act="spawn">＋</button>
-          ${model.type==="core" ? "" : `<button class="mini" title="Front" data-act="front">⬆</button>`}
+          ${model.type==="core" ? "" : `<button class="mini" title="Traer al frente" data-act="front">⬆</button>`}
           ${model.type==="core" ? "" : `<button class="mini" title="Eliminar" data-act="del">✕</button>`}
         </div>
       </div>
-      <div class="nodeBody">${renderBody(model.type, model.id, model.state)}</div>
-      <div class="nodeResizer" title="Resize window" data-resize></div>
+      <div class="nodeBody">${renderBody(model.type, id, model.state)}</div>
     `;
 
     $("#nodes").appendChild(el);
-    syncNodeDOM(model.id);
-    bindNode(model.id);
+    syncNodeDOM(id);
+    bindNode(id);
 
-    // init special
-    if(model.type==="watchlist") renderWatchlistTags(model.id);
-    if(model.type==="snapshots") renderSnapshots(model.id);
-    if(model.type==="alerts") renderAlerts(model.id);
-    if(model.type==="multichart"){ applyMultiLayout(model.id); renderMultiChart(model.id); bindMultiResize(model.id); }
+    if(model.type==="watchlist") renderWatchlistTags(id);
+    if(model.type==="snapshots") renderSnapshots(id);
+    if(model.type==="alerts") renderAlerts(id);
   }
 
   Engine.edges = (data.edges||[]).filter(e=> byId.has(e.from) && byId.has(e.to));
 
   for(const [id, m] of Engine.nodes){
     if(m.type==="chart" || m.type==="core") renderTradingViewWidgetSimple(id);
+    if(m.type==="multichart"){ renderMultiChart(id); applyMultiLayout(id); bindMultiResize(id); }
     if(m.type==="news" || m.type==="calendar") loadFeed(id);
   }
 
-  Engine.resizeLocked = !!data.resizeLocked;
-  applyResizeLockUI();
   drawWires();
   saveAuto();
 }
@@ -1966,7 +1807,9 @@ function loadAuto(){
   }catch(_){ return false; }
 }
 
-/* Workspace Mode */
+/* =========================================================
+   Workspace Mode
+========================================================= */
 function applyWorkspace(mode){
   const sr = stageRect();
   const padX = 14;
@@ -1974,11 +1817,11 @@ function applyWorkspace(mode){
 
   if(mode === "free") return;
 
-  const core = [], multi=[], charts=[], news=[], cal=[], watch=[], snaps=[], strat=[], alerts=[], notes=[];
+  const core=[], charts=[], mult=[], news=[], cal=[], watch=[], snaps=[], strat=[], alerts=[], notes=[];
   for(const [id,n] of Engine.nodes){
     if(n.type==="core") core.push(n);
-    else if(n.type==="multichart") multi.push(n);
     else if(n.type==="chart") charts.push(n);
+    else if(n.type==="multichart") mult.push(n);
     else if(n.type==="news") news.push(n);
     else if(n.type==="calendar") cal.push(n);
     else if(n.type==="watchlist") watch.push(n);
@@ -1991,15 +1834,15 @@ function applyWorkspace(mode){
   let colA=[], colB=[], colC=[];
   if(mode==="london"){
     colA = [...core, ...watch, ...strat];
-    colB = [...multi, ...charts];
+    colB = [...mult, ...charts];
     colC = [...cal, ...news, ...snaps, ...alerts, ...notes];
   }else if(mode==="ny"){
     colA = [...core, ...watch, ...alerts];
-    colB = [...multi, ...charts];
+    colB = [...mult, ...charts];
     colC = [...news, ...cal, ...snaps, ...strat, ...notes];
   }else{
     colA = [...core, ...snaps, ...notes];
-    colB = [...multi, ...charts];
+    colB = [...mult, ...charts];
     colC = [...news, ...cal, ...watch, ...strat, ...alerts];
   }
 
@@ -2023,30 +1866,26 @@ function applyWorkspace(mode){
   stack(colC, x3);
 
   drawWires();
+  for(const [id,m] of Engine.nodes){
+    if(m.type==="multichart") applyMultiLayout(id);
+  }
   saveAuto();
 }
 
-/* Top buttons */
-$("#btnResizeLock").onclick = ()=>{
-  Engine.resizeLocked = !Engine.resizeLocked;
-  applyResizeLockUI();
-  saveAuto();
-};
+/* =========================================================
+   Top bar buttons
+========================================================= */
+$("#btnAddChart").onclick = ()=>{ createNode({type:"chart", parentId:getCoreIdOrNull(), state: coreStateHint()}); saveAuto(); };
+$("#btnAddMulti").onclick = ()=>{ createNode({type:"multichart", parentId:getCoreIdOrNull(), state:{symbol: coreStateHint().symbol || "OANDA:EURUSD"}}); saveAuto(); };
+$("#btnAddNews").onclick  = ()=>{ createNode({type:"news", parentId:getCoreIdOrNull()}); saveAuto(); };
+$("#btnAddCal").onclick   = ()=>{ createNode({type:"calendar", parentId:getCoreIdOrNull(), state:{feed:"myfxbook_calendar"}}); saveAuto(); };
+$("#btnAddWatch").onclick = ()=>{ createNode({type:"watchlist", parentId:getCoreIdOrNull()}); saveAuto(); };
+$("#btnAddSnap").onclick  = ()=>{ createNode({type:"snapshots", parentId:getCoreIdOrNull()}); saveAuto(); };
+$("#btnAddStrat").onclick = ()=>{ createNode({type:"strategy", parentId:getCoreIdOrNull()}); saveAuto(); };
+$("#btnAddAlert").onclick = ()=>{ createNode({type:"alerts", parentId:getCoreIdOrNull()}); saveAuto(); };
+$("#btnAddNote").onclick  = ()=>{ createNode({type:"notes", parentId:getCoreIdOrNull()}); saveAuto(); };
 
-$("#btnAddMulti").onclick  = ()=>{ createNode({type:"multichart", parentId:getCoreIdOrNull(), state:{...defaultNodeState("multichart"), ...coreStateHint(), cells:["240","60","15","1"]}}); saveAuto(); };
-$("#btnAddChart").onclick  = ()=>{ createNode({type:"chart", parentId:getCoreIdOrNull(), state: coreStateHint()}); saveAuto(); };
-$("#btnAddNews").onclick   = ()=>{ createNode({type:"news", parentId:getCoreIdOrNull()}); saveAuto(); };
-$("#btnAddCal").onclick    = ()=>{ createNode({type:"calendar", parentId:getCoreIdOrNull(), state:{feed:"myfxbook_calendar"}}); saveAuto(); };
-$("#btnAddWatch").onclick  = ()=>{ createNode({type:"watchlist", parentId:getCoreIdOrNull()}); saveAuto(); };
-$("#btnAddSnap").onclick   = ()=>{ createNode({type:"snapshots", parentId:getCoreIdOrNull()}); saveAuto(); };
-$("#btnAddStrat").onclick  = ()=>{ createNode({type:"strategy", parentId:getCoreIdOrNull()}); saveAuto(); };
-$("#btnAddAlert").onclick  = ()=>{ createNode({type:"alerts", parentId:getCoreIdOrNull()}); saveAuto(); };
-$("#btnAddNote").onclick   = ()=>{ createNode({type:"notes", parentId:getCoreIdOrNull()}); saveAuto(); };
-
-$("#btnWorkspace").onclick = ()=>{
-  const mode = $("#workspaceSel").value;
-  applyWorkspace(mode);
-};
+$("#btnWorkspace").onclick = ()=> applyWorkspace($("#workspaceSel").value);
 
 $("#btnSave").onclick = ()=>{ saveAuto(); alert("✅ Guardado en localStorage"); };
 $("#btnLoad").onclick = ()=>{ if(!loadAuto()) alert("No hay save todavía."); };
@@ -2069,23 +1908,28 @@ $("#btnImport").onclick = async ()=>{
     const f = inp.files?.[0];
     if(!f) return;
     const txt = await f.text();
-    try{
-      applySnapshot(JSON.parse(txt));
-      alert("✅ Importado");
-    }catch(err){
-      alert("❌ JSON inválido: " + err);
-    }
+    try{ applySnapshot(JSON.parse(txt)); alert("✅ Importado"); }
+    catch(err){ alert("❌ JSON inválido: " + err); }
   };
   inp.click();
 };
 
 $("#btnResetAll").onclick = ()=>{
-  if(!confirm("Esto borra TODO (layout + nodos) en este navegador. ¿Seguro?")) return;
+  if(!confirm("Esto borra TODO en este navegador. ¿Seguro?")) return;
   localStorage.removeItem(STORE_KEY);
   location.reload();
 };
 
-/* Boot */
+function coreStateHint(){
+  const coreId = getCoreIdOrNull();
+  if(!coreId) return {};
+  const core = Engine.nodes.get(coreId);
+  return { symbol: core.state.symbol, interval: core.state.interval };
+}
+
+/* =========================================================
+   Boot
+========================================================= */
 (function init(){
   const loaded = loadAuto();
   if(!loaded){
@@ -2099,8 +1943,8 @@ $("#btnResetAll").onclick = ()=>{
       state: { title:"CORE", symbol:"OANDA:EURUSD", interval:"15" }
     });
 
-    createNode({type:"multichart", parentId:getCoreIdOrNull(), state:{title:"Multi HTF→LTF", symbol:"OANDA:EURUSD", cells:["240","60","15","1"]}});
     createNode({type:"watchlist", parentId:getCoreIdOrNull(), state:{title:"Watchlist"}});
+    createNode({type:"multichart", parentId:getCoreIdOrNull(), state:{title:"Multi-Chart", symbol:"OANDA:EURUSD", cells:["240","60","15","1"], layout:"1big-2right"}});
     createNode({type:"news", parentId:getCoreIdOrNull(), state:{title:"Forex News", feed:"myfxbook_news", limit:10, filter:"USD"}});
     createNode({type:"calendar", parentId:getCoreIdOrNull(), state:{title:"Calendar", feed:"myfxbook_calendar", limit:15, filter:"USD"}});
     createNode({type:"snapshots", parentId:getCoreIdOrNull(), state:{title:"Snapshots"}});
