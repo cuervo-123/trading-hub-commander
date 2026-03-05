@@ -1,0 +1,2118 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Tech Blue • Node Engine V1.3 (Trading Command Center)</title>
+<meta name="color-scheme" content="dark">
+<style>
+  :root{
+    --bg0:#060a16;
+    --bg1:#0b1020;
+    --panel:#0f1630cc;
+    --panel2:#0b1430cc;
+    --line:rgba(79,155,255,.28);
+    --text:#eaf2ff;
+    --muted:#9eb8ff;
+    --accent:#1f8bff;
+    --accent2:#4ac3ff;
+    --good:#20c997; --warn:#ffb020; --bad:#ef476f;
+    --shadow: 0 18px 50px rgba(0,0,0,.55);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    background: radial-gradient(1200px 800px at 20% 10%, rgba(31,139,255,.22), transparent 60%),
+                radial-gradient(1100px 700px at 85% 35%, rgba(74,195,255,.12), transparent 65%),
+                linear-gradient(160deg, var(--bg0) 0%, var(--bg1) 40%, #071029 100%);
+    color:var(--text);
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    overflow:hidden;
+  }
+
+  /* Top bar */
+  header{
+    position:fixed; inset:10px 10px auto 10px;
+    display:flex; align-items:center; justify-content:space-between;
+    gap:10px;
+    z-index:30;
+    pointer-events:none;
+  }
+  .brand{
+    pointer-events:auto;
+    display:flex; align-items:center; gap:10px;
+    background: linear-gradient(180deg, rgba(15,22,48,.75), rgba(11,20,48,.55));
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:10px 12px;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
+  }
+  .logo{
+    width:34px;height:34px;border-radius:12px;
+    border:1px solid rgba(255,255,255,.10);
+    background:
+      radial-gradient(10px 10px at 30% 30%, rgba(255,255,255,.18), transparent 60%),
+      linear-gradient(135deg, rgba(31,139,255,.35), rgba(74,195,255,.15));
+  }
+  .brand b{font-size:13px; letter-spacing:.2px}
+  .brand small{display:block; color:var(--muted); font-size:11px; margin-top:1px}
+
+  .barActions{
+    pointer-events:auto;
+    display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;
+    align-items:center;
+  }
+
+  .btn{
+    border:1px solid var(--line);
+    background: rgba(10,18,40,.55);
+    color:var(--text);
+    padding:9px 10px;
+    border-radius:14px;
+    cursor:pointer;
+    font-size:12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.30);
+    backdrop-filter: blur(10px);
+    user-select:none;
+  }
+  .btn:hover{border-color: rgba(79,155,255,.55)}
+  .btn:active{transform: translateY(1px)}
+  .btn.bad{border-color: rgba(239,71,111,.35)}
+  .btn.good{border-color: rgba(32,201,151,.35)}
+  .btn.warn{border-color: rgba(255,176,32,.35)}
+
+  .pill{
+    border:1px solid rgba(79,155,255,.25);
+    background: rgba(10,18,40,.55);
+    color:var(--text);
+    padding:7px 10px;
+    border-radius:999px;
+    font-size:12px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .pill select{
+    padding:6px 8px;
+    border-radius:999px;
+    border:1px solid rgba(79,155,255,.22);
+    background: rgba(2,8,20,.45);
+    color: var(--text);
+    outline:none;
+    font-size:12px;
+  }
+
+  /* Stage */
+  #stage{ position:absolute; inset:0; overflow:hidden; }
+  #wires{ position:absolute; inset:0; z-index:5; pointer-events:none; }
+  #nodes{ position:absolute; inset:0; z-index:10; }
+
+  /* Node */
+  .node{
+    position:absolute;
+    width: 320px;
+    height: 320px;
+    max-width: min(92vw, 760px);
+    border-radius: 20px;
+    border:1px solid var(--line);
+    background: linear-gradient(180deg, rgba(15,22,48,.78), rgba(11,20,48,.55));
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
+    overflow:hidden;
+    user-select:none;
+    transform: translate3d(0,0,0);
+    min-width:260px;
+    min-height:200px;
+  }
+  .node[data-type="core"]{ width: 360px; height: 360px; }
+  .node[data-type="chart"]{ width: 360px; height: 640px; }
+  .node[data-type="multichart"]{ width: 760px; height: 560px; }
+
+  .nodeHead{
+    padding:10px 12px;
+    display:flex; align-items:center; justify-content:space-between;
+    gap:10px;
+    border-bottom: 1px solid rgba(79,155,255,.18);
+    background: radial-gradient(900px 300px at 20% 0%, rgba(31,139,255,.20), transparent 60%);
+    cursor: grab;
+  }
+  .nodeHead:active{cursor:grabbing}
+
+  .nodeTitle{ display:flex; align-items:center; gap:10px; min-width:0; }
+  .chip{
+    font-size:11px;
+    padding:5px 8px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.10);
+    color:var(--muted);
+    background: rgba(255,255,255,.04);
+    white-space:nowrap;
+  }
+  .nodeTitle b{
+    font-size:12.5px;
+    letter-spacing:.2px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    max-width: 240px;
+  }
+
+  .nodeTools{ display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end; }
+  .mini{
+    border:1px solid rgba(79,155,255,.20);
+    background: rgba(0,0,0,.18);
+    color:var(--text);
+    padding:6px 8px;
+    border-radius:12px;
+    cursor:pointer;
+    font-size:12px;
+    user-select:none;
+  }
+  .mini:hover{border-color: rgba(79,155,255,.55)}
+  .mini:active{transform: translateY(1px)}
+
+  .nodeBody{
+    padding:10px 12px 12px;
+    user-select:text;
+    height: calc(100% - 54px);
+    overflow:auto;
+  }
+
+  .row{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+  .field{
+    display:flex; flex-direction:column; gap:6px;
+    min-width: 120px;
+    flex: 1 1 140px;
+  }
+  label{font-size:11px; color:var(--muted)}
+  input,select,textarea{
+    width:100%;
+    padding:9px 10px;
+    border-radius:14px;
+    border:1px solid rgba(79,155,255,.22);
+    background: rgba(2,8,20,.45);
+    color:var(--text);
+    outline:none;
+  }
+  textarea{min-height:78px; resize:vertical}
+
+  .hint{color:var(--muted); font-size:11px; line-height:1.35}
+  .list{ margin-top:10px; display:grid; gap:8px; }
+  .item{
+    padding:10px 10px;
+    border-radius:14px;
+    border:1px solid rgba(79,155,255,.16);
+    background: rgba(0,0,0,.15);
+  }
+  .item a{color:var(--accent2); text-decoration:none}
+  .item a:hover{text-decoration:underline}
+  .item small{color:var(--muted)}
+
+  .tags{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;}
+  .tag{
+    border:1px solid rgba(79,155,255,.18);
+    background: rgba(0,0,0,.14);
+    padding:7px 10px;
+    border-radius:999px;
+    cursor:pointer;
+    font-size:12px;
+    color: var(--text);
+    user-select:none;
+  }
+  .tag:hover{border-color: rgba(79,155,255,.55)}
+  .tag:active{transform: translateY(1px)}
+
+  /* TradingView single chart box */
+  .tvBox{
+    margin-top:10px;
+    border-radius:16px;
+    border:1px solid rgba(79,155,255,.18);
+    overflow:hidden;
+    background: rgba(0,0,0,.15);
+  }
+  .tvBox .tvInner{height: 420px; width:100%;}
+  .node[data-type="core"] .tvBox .tvInner{height: 300px;}
+
+  /* MultiChart layout */
+  .multiWrap{
+    margin-top:10px;
+    border-radius:16px;
+    border:1px solid rgba(79,155,255,.18);
+    overflow:hidden;
+    background: rgba(0,0,0,.15);
+    height: 420px;
+    position:relative;
+  }
+  .node[data-type="multichart"] .multiWrap{ height: calc(100% - 160px); min-height: 360px; }
+
+  /* 2 small + 1 big + 1 ticker preset using CSS vars */
+  .multiGrid{
+    position:absolute; inset:0;
+    display:grid;
+    grid-template-columns: var(--mc-col, 70%) 1fr;
+    grid-template-rows: var(--mc-top, 45%) var(--mc-mid, 35%) 1fr;
+    grid-template-areas:
+      "big s1"
+      "big s2"
+      "tick tick";
+    gap: 10px;
+    padding: 10px;
+  }
+  .mcCell{
+    border-radius:14px;
+    border:1px solid rgba(79,155,255,.18);
+    overflow:hidden;
+    background: rgba(0,0,0,.12);
+    position:relative;
+  }
+  .mcCell .mcInner{ position:absolute; inset:0; }
+
+  .mcBig{ grid-area: big; }
+  .mcS1{ grid-area: s1; }
+  .mcS2{ grid-area: s2; }
+  .mcTick{ grid-area: tick; }
+
+  /* Gutters (internal resize handles) */
+  .gutter{
+    position:absolute;
+    z-index:40;
+    background: rgba(31,139,255,.08);
+    border:1px solid rgba(79,155,255,.18);
+    border-radius:12px;
+    backdrop-filter: blur(8px);
+    user-select:none;
+  }
+  .gutter:hover{ border-color: rgba(79,155,255,.55); background: rgba(31,139,255,.12); }
+  .gutter:active{ transform: translateY(1px); }
+
+  .gutter.vSplit{ /* between big & right column */
+    top:10px; bottom:10px;
+    width:14px;
+    left: calc(var(--mc-col, 70%) + 10px - 7px);
+    cursor: ew-resize;
+  }
+  .gutter.hTick{ /* between top area and ticker */
+    left:10px; right:10px;
+    height:14px;
+    top: calc(var(--mc-top, 45%) + var(--mc-mid, 35%) + 10px - 7px);
+    cursor: ns-resize;
+  }
+  .gutter.hRight{ /* between s1 and s2 (right column only) */
+    width: calc(100% - (var(--mc-col, 70%) + 30px));
+    left: calc(var(--mc-col, 70%) + 20px);
+    height:14px;
+    top: calc(var(--mc-top, 45%) + 10px - 7px);
+    cursor: ns-resize;
+  }
+
+  /* Floating tips */
+  #toast{
+    position:fixed;
+    left:10px; bottom:10px;
+    z-index:40;
+    max-width:min(720px, 92vw);
+    padding:10px 12px;
+    border-radius:16px;
+    border:1px solid var(--line);
+    background: rgba(10,18,40,.65);
+    color:var(--text);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
+    font-size:12px;
+  }
+  #toast b{color:var(--accent2)}
+
+  /* ===== Node external resize handle ===== */
+  .nodeResizer{
+    position:absolute;
+    right:10px; bottom:10px;
+    width:18px; height:18px;
+    border-radius:8px;
+    border:1px solid rgba(79,155,255,.25);
+    background:
+      radial-gradient(8px 8px at 30% 30%, rgba(255,255,255,.14), transparent 60%),
+      linear-gradient(135deg, rgba(31,139,255,.30), rgba(74,195,255,.12));
+    box-shadow: 0 10px 24px rgba(0,0,0,.35);
+    cursor: nwse-resize;
+    z-index:25;
+  }
+
+  /* Resize lock */
+  .node.resizeLocked .nodeResizer{ display:none; }
+  .node.resizeLocked .gutter{ pointer-events:none; opacity:.35; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="logo" aria-hidden="true"></div>
+    <div>
+      <b>Tech Blue • Node Engine</b>
+      <small>Trading Command Center — V1.3</small>
+    </div>
+  </div>
+
+  <div class="barActions">
+    <div class="pill">
+      Workspace:
+      <select id="workspaceSel" title="Reordena nodos por sesión">
+        <option value="free">Free</option>
+        <option value="london">London</option>
+        <option value="ny">New York</option>
+        <option value="research">Research</option>
+      </select>
+      <button class="btn" id="btnWorkspace">⚡ Apply</button>
+    </div>
+
+    <button class="btn" id="btnResizeLock">🔓 Resize: ON</button>
+
+    <button class="btn good" id="btnAddMulti">➕ Multi</button>
+    <button class="btn good" id="btnAddChart">➕ Chart</button>
+    <button class="btn" id="btnAddNews">➕ News</button>
+    <button class="btn" id="btnAddCal">➕ Calendar</button>
+    <button class="btn" id="btnAddWatch">➕ Watchlist</button>
+    <button class="btn" id="btnAddSnap">➕ Snapshots</button>
+    <button class="btn" id="btnAddStrat">➕ Strategy</button>
+    <button class="btn" id="btnAddAlert">➕ Alerts</button>
+    <button class="btn" id="btnAddNote">➕ Notes</button>
+
+    <button class="btn warn" id="btnSave">💾 Save</button>
+    <button class="btn" id="btnLoad">📂 Load</button>
+    <button class="btn" id="btnExport">⬇️ Export</button>
+    <button class="btn" id="btnImport">⬆️ Import</button>
+    <button class="btn bad" id="btnResetAll">🧨 Reset</button>
+  </div>
+</header>
+
+<div id="stage">
+  <svg id="wires"></svg>
+  <div id="nodes"></div>
+</div>
+
+<div id="toast">
+  <b>Tips:</b> Arrastra header para mover. Esquina para <b>resize window</b>. Multi tiene gutters para resize interno.
+  Usa <b>🔓/🔒</b> para Lock/Unlock.
+</div>
+
+<script>
+/* =========================================================
+   Tech Blue Node Engine V1.3 (COMPLETE)
+   - MultiChart preset: 2 small + 1 big + 1 ticker
+   - Node window resize (external)
+   - Multi internal resize (gutters)
+   - Lock/Unlock resize (global)
+   - Multi from CORE (4H/1H/15M/1M)
+   - Watchlist, Snapshots, Strategy, Alerts, News/Calendar, Workspace
+========================================================= */
+
+const STORE_KEY = "techblue_node_engine_v1_3";
+
+/* Utils */
+const $ = (q, el=document)=>el.querySelector(q);
+const $$ = (q, el=document)=>Array.from(el.querySelectorAll(q));
+const clamp = (v,min,max)=>Math.max(min, Math.min(max,v));
+const uid = ()=>"n_"+Math.random().toString(16).slice(2)+"_"+Date.now().toString(16);
+const safeText = (s)=> (s||"").toString().replace(/[<>&"]/g, m=>({ "<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;" }[m]));
+const nowISO = ()=> new Date().toISOString();
+const allOrigins = (url)=> "https://api.allorigins.win/raw?url=" + encodeURIComponent(url);
+
+function stageRect(){ return $("#stage").getBoundingClientRect(); }
+function centerOf(el){
+  const r = el.getBoundingClientRect();
+  return { x: r.left + r.width/2, y: r.top + r.height/2, w:r.width, h:r.height };
+}
+function intersects(a,b, pad=12){
+  return !(
+    a.x + a.w + pad < b.x ||
+    a.x > b.x + b.w + pad ||
+    a.y + a.h + pad < b.y ||
+    a.y > b.y + b.h + pad
+  );
+}
+
+/* Engine */
+const Engine = {
+  nodes: new Map(),
+  edges: [],
+  z: 20,
+  golden: 2.399963229728653,
+  alertTimers: new Map(),
+  resizeLocked: false
+};
+
+/* Defaults */
+function defaultNodeState(type){
+  if(type==="core") return { title:"CORE", symbol:"OANDA:EURUSD", interval:"15" };
+  if(type==="chart") return { title:"Chart", symbol:"OANDA:EURUSD", interval:"60" };
+
+  if(type==="multichart") return {
+    title:"Multi",
+    symbol:"OANDA:EURUSD",
+    preset:"2small_1big_ticker",
+    // default cells 4H/1H/15M/1M
+    cells:["240","60","15","1"],
+    // layout vars (percent)
+    mc_col: 70,     // big vs right column
+    mc_top: 45,     // right-top row height
+    mc_mid: 35      // right-mid row height (ticker uses remaining)
+  };
+
+  if(type==="news") return { title:"News", feed:"myfxbook_news", limit:10, filter:"" };
+  if(type==="calendar") return { title:"Calendar", feed:"myfxbook_calendar", limit:15, filter:"USD" };
+  if(type==="notes") return { title:"Notes", text:"Ideas / plan / checklist…" };
+
+  if(type==="watchlist") return {
+    title:"Watchlist",
+    items:"OANDA:EURUSD\nOANDA:GBPUSD\nOANDA:USDJPY\nOANDA:XAUUSD\nBINANCE:BTCUSDT\nBINANCE:ETHUSDT",
+  };
+
+  if(type==="snapshots") return { title:"Snapshots", list:[] };
+
+  if(type==="strategy") return { title:"Strategy", template:"ema_smc", notes:"", lastRun:"" };
+
+  if(type==="alerts") return {
+    title:"Alerts",
+    enabled:false,
+    mode:"crypto",
+    symbol:"bitcoin",
+    manualPrice:"",
+    everySec:15,
+    rules:[]
+  };
+
+  return { title:"Node" };
+}
+
+/* Helpers */
+function getNodeEl(id){ return document.querySelector(`.node[data-id="${id}"]`); }
+
+function syncNodeDOM(id){
+  const m = Engine.nodes.get(id);
+  const el = getNodeEl(id);
+  if(!m || !el) return;
+  el.style.left = m.x + "px";
+  el.style.top  = m.y + "px";
+  el.style.width = m.w + "px";
+  el.style.height = m.h + "px";
+}
+
+function smartPlaceAroundParent(childId, parentId){
+  const child = Engine.nodes.get(childId);
+  const parent = Engine.nodes.get(parentId);
+  if(!child || !parent) return;
+
+  const sr = stageRect();
+  const parentEl = getNodeEl(parentId);
+  const pBox = parentEl ? centerOf(parentEl) : {x: parent.x + parent.w/2, y: parent.y + parent.h/2};
+
+  let radius = 40;
+  let tries = 0;
+
+  parent.angleIndex = (parent.angleIndex ?? 0) + 1;
+  const baseAngle = parent.angleIndex * Engine.golden;
+
+  while(tries < 90){
+    const a = baseAngle + tries * 0.35;
+    const cx = pBox.x + Math.cos(a) * radius;
+    const cy = pBox.y + Math.sin(a) * radius;
+
+    const x = cx - child.w/2;
+    const y = cy - 44;
+
+    const candidate = {
+      x: clamp(x, 10, sr.width - child.w - 10),
+      y: clamp(y, 64, sr.height - child.h - 10),
+      w: child.w, h: child.h
+    };
+
+    let ok = true;
+    for(const [id, n] of Engine.nodes){
+      if(id === childId) continue;
+      const r = {x:n.x,y:n.y,w:n.w,h:n.h};
+      if(intersects(candidate, r, 14)){ ok=false; break; }
+    }
+
+    if(ok){ child.x = candidate.x; child.y = candidate.y; return; }
+    tries++;
+    if(tries % 10 === 0) radius += 55;
+  }
+
+  child.x = clamp(parent.x + parent.w + 20, 10, sr.width - child.w - 10);
+  child.y = clamp(parent.y, 64, sr.height - child.h - 10);
+}
+
+/* Render bodies */
+function renderBody(type, id, st){
+  if(type==="core" || type==="chart"){
+    const isCore = (type==="core");
+    return `
+      <div class="row">
+        <div class="field">
+          <label>Symbol (TradingView)</label>
+          <input data-k="symbol" value="${safeText(st.symbol)}" placeholder="OANDA:EURUSD, BINANCE:BTCUSDT...">
+        </div>
+        <div class="field">
+          <label>Timeframe</label>
+          <select data-k="interval">
+            ${["1","5","15","30","60","240","D","W"].map(v=>{
+              const name = ({ "1":"1m","5":"5m","15":"15m","30":"30m","60":"1H","240":"4H","D":"1D","W":"1W" }[v]||v);
+              return `<option value="${v}" ${String(st.interval)===String(v)?"selected":""}>${name}</option>`;
+            }).join("")}
+          </select>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:8px">
+        <button class="btn" style="padding:9px 10px;border-radius:14px" data-act="tvApply">🔄 Apply</button>
+        <button class="btn" style="padding:9px 10px;border-radius:14px" data-act="spawnChartChild">＋ Spawn Chart Child</button>
+        ${isCore ? `<button class="btn good" style="padding:9px 10px;border-radius:14px" data-act="syncAll">🧲 Sync All Charts</button>` : ``}
+        <span class="hint">${isCore ? "CORE recomienda par/timeframe y puede sincronizar todos los charts." : "Chart independiente."}</span>
+      </div>
+
+      <div class="tvBox">
+        <div class="tvInner" id="tv_${id}"></div>
+      </div>
+    `;
+  }
+
+  if(type==="multichart"){
+    const preset = st.preset || "2small_1big_ticker";
+    const cells = Array.isArray(st.cells) ? st.cells : ["240","60","15","1"];
+    const tfOptions = ["1","5","15","30","60","240","D","W"];
+    const tfLabel = (v)=>({ "1":"1m","5":"5m","15":"15m","30":"30m","60":"1H","240":"4H","D":"1D","W":"1W" }[v]||v);
+
+    return `
+      <div class="row">
+        <div class="field" style="flex:2 1 220px">
+          <label>Symbol (TradingView)</label>
+          <input data-k="symbol" value="${safeText(st.symbol)}" placeholder="OANDA:EURUSD, BINANCE:BTCUSDT...">
+        </div>
+        <div class="field">
+          <label>Preset</label>
+          <select data-k="preset">
+            <option value="2small_1big_ticker" ${preset==="2small_1big_ticker"?"selected":""}>2 small + 1 big + 1 ticker</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:8px">
+        <div class="field">
+          <label>BIG</label>
+          <select data-k="cell_0">${tfOptions.map(v=>`<option value="${v}" ${String(cells[0])===String(v)?"selected":""}>${tfLabel(v)}</option>`).join("")}</select>
+        </div>
+        <div class="field">
+          <label>SMALL 1</label>
+          <select data-k="cell_1">${tfOptions.map(v=>`<option value="${v}" ${String(cells[1])===String(v)?"selected":""}>${tfLabel(v)}</option>`).join("")}</select>
+        </div>
+        <div class="field">
+          <label>SMALL 2</label>
+          <select data-k="cell_2">${tfOptions.map(v=>`<option value="${v}" ${String(cells[2])===String(v)?"selected":""}>${tfLabel(v)}</option>`).join("")}</select>
+        </div>
+        <div class="field">
+          <label>TICKER</label>
+          <select data-k="cell_3">${tfOptions.map(v=>`<option value="${v}" ${String(cells[3])===String(v)?"selected":""}>${tfLabel(v)}</option>`).join("")}</select>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:8px">
+        <button class="btn" style="padding:9px 10px;border-radius:14px" data-act="multiApply">🔄 Apply Multi</button>
+        <button class="btn good" style="padding:9px 10px;border-radius:14px" data-act="multiFromCore">🧲 Multi from CORE (4H/1H/15M/1M)</button>
+        <button class="btn" style="padding:9px 10px;border-radius:14px" data-act="spawnMultiChild">＋ Spawn Multi Child</button>
+        <span class="hint">Gutters: ajusta tamaños internos. Esquina: resize ventana.</span>
+      </div>
+
+      <div class="multiWrap" id="mw_${id}">
+        <div class="multiGrid" id="mg_${id}">
+          <div class="mcCell mcBig"><div class="mcInner" id="mci_${id}_0"></div></div>
+          <div class="mcCell mcS1"><div class="mcInner" id="mci_${id}_1"></div></div>
+          <div class="mcCell mcS2"><div class="mcInner" id="mci_${id}_2"></div></div>
+          <div class="mcCell mcTick"><div class="mcInner" id="mci_${id}_3"></div></div>
+        </div>
+        <div class="gutter vSplit" data-gutter="v"></div>
+        <div class="gutter hRight" data-gutter="hr"></div>
+        <div class="gutter hTick" data-gutter="ht"></div>
+      </div>
+    `;
+  }
+
+  if(type==="news" || type==="calendar"){
+    const isCal = (type==="calendar");
+    return `
+      <div class="row">
+        <div class="field">
+          <label>Feed</label>
+          <select data-k="feed">
+            <option value="myfxbook_news" ${st.feed==="myfxbook_news"?"selected":""}>Myfxbook • Forex News (RSS)</option>
+            <option value="myfxbook_calendar" ${st.feed==="myfxbook_calendar"?"selected":""}>Myfxbook • Economic Calendar (RSS)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Items</label>
+          <select data-k="limit">
+            ${[5,10,15,20,30].map(n=>`<option value="${n}" ${String(st.limit)===String(n)?"selected":""}>${n}</option>`).join("")}
+          </select>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:8px">
+        <div class="field" style="flex:2 1 220px">
+          <label>Filter (keyword)</label>
+          <input data-k="filter" value="${safeText(st.filter||"")}" placeholder="${isCal ? "USD, EUR, CPI, FOMC, NFP..." : "BTC, rate, inflation..."}">
+        </div>
+        <button class="btn" style="padding:9px 10px;border-radius:14px; align-self:flex-end" data-act="feedRefresh">🔄 Refresh</button>
+        <button class="btn" style="padding:9px 10px;border-radius:14px; align-self:flex-end" data-act="spawnFeedChild">＋ Spawn ${isCal?"Calendar":"News"} Child</button>
+      </div>
+
+      <div class="list" id="feed_${id}">
+        <div class="item"><small>Cargando…</small></div>
+      </div>
+    `;
+  }
+
+  if(type==="watchlist"){
+    return `
+      <div class="field">
+        <label>Título</label>
+        <input data-k="title" value="${safeText(st.title)}">
+      </div>
+
+      <div class="field" style="margin-top:8px">
+        <label>Pares (uno por línea) — click crea Chart hijo</label>
+        <textarea data-k="items" placeholder="OANDA:EURUSD&#10;BINANCE:BTCUSDT">${safeText(st.items||"")}</textarea>
+      </div>
+
+      <div class="row" style="margin-top:8px">
+        <button class="btn" style="padding:9px 10px;border-radius:14px" data-act="watchRender">🔄 Render</button>
+        <button class="btn" style="padding:9px 10px;border-radius:14px" data-act="spawnWatchChild">＋ Spawn Watch Child</button>
+        <span class="hint">Tip: símbolos TradingView (OANDA:, BINANCE:, FX_IDC:).</span>
+      </div>
+
+      <div class="tags" id="watch_${id}"></div>
+    `;
+  }
+
+  if(type==="snapshots"){
+    return `
+      <div class="row">
+        <div class="field" style="flex:2 1 220px">
+          <label>Nota (opcional)</label>
+          <input id="snapNote_${id}" placeholder="ej: setup liquidez + retest OB">
+        </div>
+        <button class="btn good" style="padding:9px 10px;border-radius:14px; align-self:flex-end" data-act="snapSave">📸 Save Snapshot</button>
+      </div>
+
+      <div class="row" style="margin-top:8px">
+        <button class="btn" style="padding:9px 10px;border-radius:14px" data-act="snapExport">⬇️ Export Snapshots</button>
+        <button class="btn bad" style="padding:9px 10px;border-radius:14px" data-act="snapClear">🧹 Clear</button>
+        <span class="hint">Guarda: symbol, timeframe, fecha, nota.</span>
+      </div>
+
+      <div class="list" id="snaps_${id}"></div>
+    `;
+  }
+
+  if(type==="strategy"){
+    return `
+      <div class="row">
+        <div class="field">
+          <label>Template</label>
+          <select data-k="template">
+            <option value="ema_smc" ${st.template==="ema_smc"?"selected":""}>EMA + SMC (tu estilo)</option>
+            <option value="liquidity_50" ${st.template==="liquidity_50"?"selected":""}>Market Structure + 50% + Liquidity Sweep</option>
+            <option value="scalp_pack" ${st.template==="scalp_pack"?"selected":""}>Scalp Pack (Multi + News + Notes + Alerts)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Título</label>
+          <input data-k="title" value="${safeText(st.title)}">
+        </div>
+      </div>
+
+      <div class="field" style="margin-top:8px">
+        <label>Notas / Parámetros</label>
+        <textarea data-k="notes">${safeText(st.notes||"")}</textarea>
+      </div>
+
+      <div class="row" style="margin-top:8px">
+        <button class="btn good" style="padding:9px 10px;border-radius:14px" data-act="stratRun">🚀 Generate Nodes</button>
+        <button class="btn" style="padding:9px 10px;border-radius:14px" data-act="spawnStratChild">＋ Spawn Strategy Child</button>
+        <span class="hint">Genera nodos hijos según template.</span>
+      </div>
+
+      <div class="item" style="margin-top:10px">
+        <small>Last run:</small>
+        <div class="hint" id="stratLast_${id}">${safeText(st.lastRun||"—")}</div>
+      </div>
+    `;
+  }
+
+  if(type==="alerts"){
+    return `
+      <div class="row">
+        <div class="field">
+          <label>Enabled</label>
+          <select data-k="enabled">
+            <option value="false" ${String(st.enabled)==="false"?"selected":""}>Off</option>
+            <option value="true" ${String(st.enabled)==="true"?"selected":""}>On</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Mode</label>
+          <select data-k="mode">
+            <option value="crypto" ${st.mode==="crypto"?"selected":""}>Crypto (CoinGecko)</option>
+            <option value="manual" ${st.mode==="manual"?"selected":""}>Manual price</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Every (sec)</label>
+          <select data-k="everySec">
+            ${[5,10,15,30,60].map(n=>`<option value="${n}" ${String(st.everySec)===String(n)?"selected":""}>${n}</option>`).join("")}
+          </select>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:8px">
+        <div class="field">
+          <label>Crypto id (CoinGecko)</label>
+          <input data-k="symbol" value="${safeText(st.symbol||"bitcoin")}" placeholder="bitcoin, ethereum, solana...">
+        </div>
+        <div class="field">
+          <label>Manual price</label>
+          <input data-k="manualPrice" value="${safeText(st.manualPrice||"")}" placeholder="ej: 65000">
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:8px">
+        <button class="btn" style="padding:9px 10px;border-radius:14px" data-act="alertAdd">➕ Add rule</button>
+        <button class="btn" style="padding:9px 10px;border-radius:14px" data-act="alertTest">🧪 Test notify</button>
+        <button class="btn warn" style="padding:9px 10px;border-radius:14px" data-act="alertRun">▶ Run</button>
+        <button class="btn bad" style="padding:9px 10px;border-radius:14px" data-act="alertStop">⏹ Stop</button>
+      </div>
+
+      <div class="list" id="alerts_${id}"></div>
+      <div class="hint" style="margin-top:8px">Chrome: candado → Notifications (Allow)</div>
+    `;
+  }
+
+  if(type==="notes"){
+    return `
+      <div class="field">
+        <label>Título</label>
+        <input data-k="title" value="${safeText(st.title)}">
+      </div>
+      <div class="field" style="margin-top:8px">
+        <label>Notas</label>
+        <textarea data-k="text">${safeText(st.text)}</textarea>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" style="padding:9px 10px;border-radius:14px" data-act="spawnNoteChild">＋ Spawn Note Child</button>
+        <span class="hint">Checklist / journal / reglas.</span>
+      </div>
+    `;
+  }
+
+  return `<div class="hint">Nodo.</div>`;
+}
+
+/* Create node */
+function createNode({type="notes", parentId=null, x=null, y=null, state=null, idOverride=null}){
+  const id = idOverride || uid();
+  const st = state ? {...defaultNodeState(type), ...state} : defaultNodeState(type);
+
+  // sizes
+  let w = 320, h = 320;
+  if(type==="core"){ w=360; h=360; }
+  if(type==="chart"){ w=360; h=640; }
+  if(type==="multichart"){ w=760; h=560; }
+  if(type==="news"){ w=360; h=520; }
+  if(type==="calendar"){ w=360; h=520; }
+  if(type==="watchlist"){ w=360; h=460; }
+  if(type==="snapshots"){ w=360; h=520; }
+  if(type==="strategy"){ w=360; h=520; }
+  if(type==="alerts"){ w=360; h=560; }
+
+  const nodeModel = {
+    id, type, parentId,
+    x: x ?? 100, y: y ?? 100,
+    w, h,
+    state: st,
+    createdAt: Date.now(),
+    angleIndex: 0
+  };
+
+  const el = document.createElement("div");
+  el.className = "node";
+  el.dataset.id = id;
+  el.dataset.type = type;
+  el.style.zIndex = (++Engine.z).toString();
+  el.style.width = w + "px";
+  el.style.height = h + "px";
+
+  el.innerHTML = `
+    <div class="nodeHead" data-drag>
+      <div class="nodeTitle">
+        <span class="chip">${type.toUpperCase()}</span>
+        <b data-title>${safeText(st.title || type)}</b>
+      </div>
+      <div class="nodeTools">
+        <button class="mini" title="Crear nodo hijo" data-act="spawn">＋</button>
+        ${type==="core" ? "" : `<button class="mini" title="Front" data-act="front">⬆</button>`}
+        ${type==="core" ? "" : `<button class="mini" title="Eliminar" data-act="del">✕</button>`}
+      </div>
+    </div>
+    <div class="nodeBody">${renderBody(type, id, st)}</div>
+    <div class="nodeResizer" title="Resize window" data-resize></div>
+  `;
+
+  $("#nodes").appendChild(el);
+  Engine.nodes.set(id, nodeModel);
+
+  if(parentId){
+    smartPlaceAroundParent(id, parentId);
+    Engine.edges.push({from: parentId, to: id});
+  }else{
+    const sr = stageRect();
+    nodeModel.x = clamp(nodeModel.x, 10, sr.width - w - 10);
+    nodeModel.y = clamp(nodeModel.y, 64, sr.height - h - 10);
+  }
+
+  syncNodeDOM(id);
+  bindNode(id);
+
+  // init special
+  if(type==="chart" || type==="core") renderTradingViewWidgetSimple(id);
+  if(type==="multichart"){ applyMultiLayout(id); renderMultiChart(id); bindMultiResize(id); }
+  if(type==="news" || type==="calendar") loadFeed(id);
+  if(type==="watchlist") renderWatchlistTags(id);
+  if(type==="snapshots") renderSnapshots(id);
+  if(type==="alerts") renderAlerts(id);
+
+  applyResizeLockUI();
+  drawWires();
+  return id;
+}
+
+/* Pull inputs into state */
+function pullFieldsIntoState(id){
+  const el = getNodeEl(id);
+  const m = Engine.nodes.get(id);
+  if(!el || !m) return;
+
+  // generic k
+  $$("[data-k]", el).forEach(inp=>{
+    const k = inp.dataset.k;
+    let v = inp.value;
+
+    if(inp.tagName==="SELECT"){
+      if(k==="limit") v = Number(v);
+      if(k==="everySec") v = Number(v);
+      if(k==="enabled") v = (String(v)==="true");
+    }
+    m.state[k] = v;
+  });
+
+  // multichart cells
+  if(m.type==="multichart"){
+    const c0 = el.querySelector('select[data-k="cell_0"]')?.value;
+    const c1 = el.querySelector('select[data-k="cell_1"]')?.value;
+    const c2 = el.querySelector('select[data-k="cell_2"]')?.value;
+    const c3 = el.querySelector('select[data-k="cell_3"]')?.value;
+    m.state.cells = [c0||"240", c1||"60", c2||"15", c3||"1"];
+  }
+}
+
+/* Bind node events */
+function bindNode(id){
+  const el = getNodeEl(id);
+  const m = Engine.nodes.get(id);
+  if(!el || !m) return;
+
+  el.addEventListener("pointerdown", ()=>{ el.style.zIndex = (++Engine.z).toString(); });
+
+  // actions
+  el.addEventListener("click", (e)=>{
+    const btn = e.target.closest("[data-act]");
+    if(!btn) return;
+    const act = btn.dataset.act;
+
+    if(act==="front"){ el.style.zIndex = (++Engine.z).toString(); return; }
+    if(act==="del"){ if(confirm("¿Eliminar este nodo y sus conexiones?")) removeNode(id); return; }
+    if(act==="spawn"){ spawnMenu(id); return; }
+
+    if(act==="tvApply"){ pullFieldsIntoState(id); renderTradingViewWidgetSimple(id); saveAuto(); return; }
+    if(act==="syncAll"){ pullFieldsIntoState(id); syncAllChartsFromCore(id); saveAuto(); return; }
+    if(act==="spawnChartChild"){
+      pullFieldsIntoState(id);
+      createNode({type:"chart", parentId:id, state:{symbol:m.state.symbol, interval:m.state.interval, title:"Chart Child"}});
+      saveAuto(); return;
+    }
+
+    if(act==="multiApply"){
+      pullFieldsIntoState(id);
+      applyMultiLayout(id);
+      renderMultiChart(id);
+      bindMultiResize(id);
+      saveAuto();
+      return;
+    }
+
+    if(act==="multiFromCore"){
+      const coreId = getCoreIdOrNull();
+      if(!coreId) return alert("No CORE node found.");
+      const core = Engine.nodes.get(coreId);
+
+      m.state.symbol = (core.state.symbol || "OANDA:EURUSD").trim() || "OANDA:EURUSD";
+      m.state.cells = ["240","60","15","1"];
+
+      const symInp = el.querySelector('input[data-k="symbol"]');
+      if(symInp) symInp.value = m.state.symbol;
+
+      ["0","1","2","3"].forEach(i=>{
+        const sel = el.querySelector(`select[data-k="cell_${i}"]`);
+        if(sel) sel.value = m.state.cells[Number(i)];
+      });
+
+      applyMultiLayout(id);
+      renderMultiChart(id);
+      bindMultiResize(id);
+      saveAuto();
+      return;
+    }
+
+    if(act==="spawnMultiChild"){
+      pullFieldsIntoState(id);
+      createNode({type:"multichart", parentId:id, state:{title:"Multi Child", symbol:m.state.symbol, cells:m.state.cells}});
+      saveAuto(); return;
+    }
+
+    if(act==="feedRefresh"){ pullFieldsIntoState(id); loadFeed(id); saveAuto(); return; }
+    if(act==="spawnFeedChild"){
+      pullFieldsIntoState(id);
+      const childType = (m.state.feed==="myfxbook_calendar") ? "calendar" : "news";
+      createNode({type:childType, parentId:id, state:{feed:m.state.feed, limit:m.state.limit, filter:m.state.filter, title:(childType==="calendar"?"Calendar Child":"News Child")}});
+      saveAuto(); return;
+    }
+
+    if(act==="watchRender"){ pullFieldsIntoState(id); renderWatchlistTags(id); saveAuto(); return; }
+    if(act==="spawnWatchChild"){ pullFieldsIntoState(id); createNode({type:"watchlist", parentId:id, state:{items:m.state.items, title:"Watch Child"}}); saveAuto(); return; }
+
+    if(act==="snapSave"){ saveSnapshot(id); saveAuto(); return; }
+    if(act==="snapExport"){ exportSnapshots(id); return; }
+    if(act==="snapClear"){ if(confirm("¿Borrar snapshots?")){ Engine.nodes.get(id).state.list=[]; renderSnapshots(id); saveAuto(); } return; }
+
+    if(act==="stratRun"){ pullFieldsIntoState(id); runStrategy(id); saveAuto(); return; }
+    if(act==="spawnStratChild"){ pullFieldsIntoState(id); createNode({type:"strategy", parentId:id, state:{template:m.state.template, title:"Strategy Child"}}); saveAuto(); return; }
+
+    if(act==="alertAdd"){ pullFieldsIntoState(id); addAlertRule(id); saveAuto(); return; }
+    if(act==="alertTest"){ testNotify("Tech Blue Alerts", "Test OK ✅"); return; }
+    if(act==="alertRun"){ pullFieldsIntoState(id); startAlerts(id); saveAuto(); return; }
+    if(act==="alertStop"){ stopAlerts(id); saveAuto(); return; }
+
+    if(act==="spawnNoteChild"){ pullFieldsIntoState(id); createNode({type:"notes", parentId:id, state:{title:"Notes Child", text:""}}); saveAuto(); return; }
+  });
+
+  // drag
+  const head = el.querySelector("[data-drag]");
+  let dragging = false, sx=0, sy=0, ox=0, oy=0;
+
+  head.addEventListener("pointerdown", (e)=>{
+    dragging = true;
+    head.setPointerCapture(e.pointerId);
+    sx = e.clientX; sy = e.clientY;
+    ox = m.x; oy = m.y;
+  });
+
+  head.addEventListener("pointermove", (e)=>{
+    if(!dragging) return;
+    const sr = stageRect();
+    m.x = clamp(ox + (e.clientX - sx), 10, sr.width - m.w - 10);
+    m.y = clamp(oy + (e.clientY - sy), 64, sr.height - m.h - 10);
+    syncNodeDOM(id);
+    drawWires();
+  });
+
+  head.addEventListener("pointerup", (e)=>{
+    dragging = false;
+    try{ head.releasePointerCapture(e.pointerId); }catch(_){}
+    saveAuto();
+  });
+
+  // change handlers
+  el.addEventListener("change", (e)=>{
+    if(!e.target.matches("input[data-k],select[data-k],textarea[data-k]")) return;
+
+    pullFieldsIntoState(id);
+
+    const nm = Engine.nodes.get(id);
+    const titleEl = el.querySelector("[data-title]");
+    if(titleEl) titleEl.textContent = nm.state.title || nm.type.toUpperCase();
+
+    if(nm.type === "chart" || nm.type === "core") renderTradingViewWidgetSimple(id);
+    if(nm.type === "multichart"){ applyMultiLayout(id); renderMultiChart(id); bindMultiResize(id); }
+    if(nm.type === "news" || nm.type === "calendar") loadFeed(id);
+    if(nm.type === "watchlist") renderWatchlistTags(id);
+    if(nm.type === "snapshots") renderSnapshots(id);
+    if(nm.type === "alerts") renderAlerts(id);
+
+    saveAuto();
+  });
+
+  // ===== external node resize (window resize) =====
+  const resizer = el.querySelector("[data-resize]");
+  let resizing = false, rsx=0, rsy=0, rw=0, rh=0;
+
+  if(resizer){
+    resizer.addEventListener("pointerdown", (e)=>{
+      if(Engine.resizeLocked) return;
+      resizing = true;
+      el.style.zIndex = (++Engine.z).toString();
+      resizer.setPointerCapture(e.pointerId);
+      rsx = e.clientX; rsy = e.clientY;
+      rw = m.w; rh = m.h;
+      e.preventDefault();
+      e.stopPropagation();
+    });
+
+    resizer.addEventListener("pointermove", (e)=>{
+      if(!resizing) return;
+      const sr = stageRect();
+
+      const minW = 260;
+      const minH = (m.type==="multichart") ? 520 : 220;
+      const maxW = Math.max(minW, sr.width - 20);
+      const maxH = Math.max(minH, sr.height - 80);
+
+      m.w = clamp(rw + (e.clientX - rsx), minW, maxW);
+      m.h = clamp(rh + (e.clientY - rsy), minH, maxH);
+
+      el.style.width = m.w + "px";
+      el.style.height = m.h + "px";
+
+      m.x = clamp(m.x, 10, sr.width - m.w - 10);
+      m.y = clamp(m.y, 64, sr.height - m.h - 10);
+      syncNodeDOM(id);
+
+      drawWires();
+
+      if(m.type==="multichart"){
+        applyMultiLayout(id);
+      }
+    });
+
+    resizer.addEventListener("pointerup", (e)=>{
+      resizing = false;
+      try{ resizer.releasePointerCapture(e.pointerId); }catch(_){}
+
+      if(m.type==="multichart"){
+        renderMultiChart(id);
+        applyMultiLayout(id);
+        bindMultiResize(id);
+      }else if(m.type==="chart" || m.type==="core"){
+        renderTradingViewWidgetSimple(id);
+      }
+      saveAuto();
+    });
+  }
+}
+
+/* Spawn menu */
+function spawnMenu(parentId){
+  const pick = prompt(
+`Crear nodo hijo:
+1=Chart  2=Multi  3=News  4=Calendar
+5=Watchlist  6=Snapshots  7=Strategy  8=Alerts  9=Notes
+
+Escribe 1-9:`
+  );
+  if(pick===null) return;
+  const p = pick.trim();
+  const map = { "1":"chart","2":"multichart","3":"news","4":"calendar","5":"watchlist","6":"snapshots","7":"strategy","8":"alerts","9":"notes" };
+  if(map[p]) return createNode({type:map[p], parentId});
+}
+
+/* Remove node */
+function removeNode(id){
+  stopAlerts(id);
+  Engine.edges = Engine.edges.filter(e => e.from!==id && e.to!==id);
+  Engine.nodes.delete(id);
+  const el = getNodeEl(id);
+  if(el) el.remove();
+  drawWires();
+  saveAuto();
+}
+
+/* Wires */
+function drawWires(){
+  const svg = $("#wires");
+  const sr = stageRect();
+  svg.setAttribute("width", sr.width);
+  svg.setAttribute("height", sr.height);
+  svg.setAttribute("viewBox", `0 0 ${sr.width} ${sr.height}`);
+  svg.innerHTML = "";
+
+  const defs = document.createElementNS("http://www.w3.org/2000/svg","defs");
+  defs.innerHTML = `
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2.2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  `;
+  svg.appendChild(defs);
+
+  for(const e of Engine.edges){
+    const aEl = getNodeEl(e.from);
+    const bEl = getNodeEl(e.to);
+    if(!aEl || !bEl) continue;
+
+    const A = centerOf(aEl);
+    const B = centerOf(bEl);
+
+    const ax = (A.x - sr.left);
+    const ay = (A.y - sr.top);
+    const bx = (B.x - sr.left);
+    const by = (B.y - sr.top);
+
+    const path = document.createElementNS("http://www.w3.org/2000/svg","path");
+    const dx = Math.abs(bx-ax);
+    const c1x = ax + dx * 0.35;
+    const c1y = ay;
+    const c2x = bx - dx * 0.35;
+    const c2y = by;
+
+    path.setAttribute("d", `M ${ax} ${ay} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${bx} ${by}`);
+    path.setAttribute("fill","none");
+    path.setAttribute("stroke","rgba(79,155,255,.45)");
+    path.setAttribute("stroke-width","2");
+    path.setAttribute("filter","url(#glow)");
+    svg.appendChild(path);
+
+    const dot = document.createElementNS("http://www.w3.org/2000/svg","circle");
+    dot.setAttribute("cx", bx);
+    dot.setAttribute("cy", by);
+    dot.setAttribute("r", "4");
+    dot.setAttribute("fill","rgba(74,195,255,.85)");
+    dot.setAttribute("filter","url(#glow)");
+    svg.appendChild(dot);
+  }
+}
+
+window.addEventListener("resize", ()=>{
+  const sr = stageRect();
+  for(const [id, m] of Engine.nodes){
+    m.x = clamp(m.x, 10, sr.width - m.w - 10);
+    m.y = clamp(m.y, 64, sr.height - m.h - 10);
+    syncNodeDOM(id);
+  }
+  drawWires();
+});
+
+/* ===== TradingView (single) reliable render ===== */
+function renderTradingViewWidgetSimple(nodeId){
+  const m = Engine.nodes.get(nodeId);
+  if(!m) return;
+
+  const mount = document.getElementById("tv_" + nodeId);
+  if(!mount) return;
+
+  while(mount.firstChild) mount.removeChild(mount.firstChild);
+
+  const inner = document.createElement("div");
+  inner.style.width = "100%";
+  inner.style.height = "100%";
+  mount.appendChild(inner);
+
+  const interval = (m.state.interval ?? "60").toString().trim() || "60";
+  const symbol = (m.state.symbol || "OANDA:EURUSD").toString().trim() || "OANDA:EURUSD";
+
+  const cfg = {
+    autosize: true,
+    symbol,
+    interval,
+    timezone: "Etc/UTC",
+    theme: "dark",
+    style: "1",
+    locale: "en",
+    enable_publishing: false,
+    hide_top_toolbar: false,
+    hide_legend: false,
+    allow_symbol_change: true,
+    save_image: true,
+    calendar: true,
+    support_host: "https://www.tradingview.com"
+  };
+
+  const script = document.createElement("script");
+  script.type = "text/javascript";
+  script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
+  script.async = true;
+  script.text = JSON.stringify(cfg);
+
+  requestAnimationFrame(()=> inner.appendChild(script));
+}
+
+/* ===== MultiChart: apply preset layout vars ===== */
+function applyMultiLayout(nodeId){
+  const m = Engine.nodes.get(nodeId);
+  const grid = document.getElementById("mg_" + nodeId);
+  if(!m || !grid) return;
+
+  const col = clamp(Number(m.state.mc_col ?? 70), 40, 85);
+  const top = clamp(Number(m.state.mc_top ?? 45), 20, 70);
+  const mid = clamp(Number(m.state.mc_mid ?? 35), 10, 60);
+  const sum = top + mid;
+  const topN = clamp(top, 20, 80);
+  const midN = clamp(mid, 10, 70);
+  const tickN = clamp(100 - sum, 12, 50);
+
+  grid.style.setProperty("--mc-col", col + "%");
+  grid.style.setProperty("--mc-top", topN + "%");
+  grid.style.setProperty("--mc-mid", midN + "%");
+
+  // also update gutter positions (they reference vars)
+}
+
+/* ===== MultiChart: render 4 embedded charts ===== */
+function renderMultiChart(nodeId){
+  const m = Engine.nodes.get(nodeId);
+  if(!m) return;
+
+  const symbol = (m.state.symbol || "OANDA:EURUSD").toString().trim() || "OANDA:EURUSD";
+  const cells = Array.isArray(m.state.cells) ? m.state.cells : ["240","60","15","1"];
+
+  for(let i=0;i<4;i++){
+    const inner = document.getElementById(`mci_${nodeId}_${i}`);
+    if(!inner) continue;
+
+    // strong rebuild
+    while(inner.firstChild) inner.removeChild(inner.firstChild);
+
+    const wrap = document.createElement("div");
+    wrap.style.width = "100%";
+    wrap.style.height = "100%";
+    inner.appendChild(wrap);
+
+    const interval = (cells[i] ?? "60").toString().trim() || "60";
+    const cfg = {
+      autosize: true,
+      symbol,
+      interval,
+      timezone: "Etc/UTC",
+      theme: "dark",
+      style: "1",
+      locale: "en",
+      enable_publishing: false,
+      hide_top_toolbar: false,
+      hide_legend: true,
+      allow_symbol_change: false,
+      save_image: true,
+      calendar: true,
+      support_host: "https://www.tradingview.com"
+    };
+
+    const script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
+    script.async = true;
+    script.text = JSON.stringify(cfg);
+
+    requestAnimationFrame(()=> wrap.appendChild(script));
+  }
+}
+
+/* ===== MultiChart internal resize (gutters) ===== */
+function bindMultiResize(nodeId){
+  const m = Engine.nodes.get(nodeId);
+  const wrap = document.getElementById("mw_" + nodeId);
+  const grid = document.getElementById("mg_" + nodeId);
+  if(!m || !wrap || !grid) return;
+
+  const gutV = wrap.querySelector('.gutter[data-gutter="v"]');
+  const gutHR = wrap.querySelector('.gutter[data-gutter="hr"]');
+  const gutHT = wrap.querySelector('.gutter[data-gutter="ht"]');
+
+  const setVars = (col, top, mid)=>{
+    m.state.mc_col = clamp(col, 40, 85);
+    m.state.mc_top = clamp(top, 20, 70);
+    m.state.mc_mid = clamp(mid, 10, 60);
+    applyMultiLayout(nodeId);
+    saveAuto();
+  };
+
+  function pxToPctX(px){
+    const r = wrap.getBoundingClientRect();
+    const usable = r.width - 20; // padding 10+10
+    return clamp((px / usable) * 100, 40, 85);
+  }
+  function pxToPctY(px){
+    const r = wrap.getBoundingClientRect();
+    const usable = r.height - 20;
+    return clamp((px / usable) * 100, 12, 88);
+  }
+
+  // Vertical split: change mc_col
+  if(gutV){
+    let active=false, sx=0, startCol=70;
+    gutV.onpointerdown = (e)=>{
+      if(Engine.resizeLocked) return;
+      active=true;
+      gutV.setPointerCapture(e.pointerId);
+      sx = e.clientX;
+      startCol = Number(m.state.mc_col ?? 70);
+      e.preventDefault();
+    };
+    gutV.onpointermove = (e)=>{
+      if(!active) return;
+      const r = wrap.getBoundingClientRect();
+      const delta = e.clientX - r.left - 10; // inside padding
+      const colPct = pxToPctX(delta);
+      setVars(colPct, Number(m.state.mc_top ?? 45), Number(m.state.mc_mid ?? 35));
+    };
+    gutV.onpointerup = (e)=>{
+      active=false;
+      try{ gutV.releasePointerCapture(e.pointerId); }catch(_){}
+      // optional: rerender charts for perfect fit (light debounce)
+      debounceMultiRerender(nodeId);
+    };
+  }
+
+  // Right column horizontal split between s1 and s2: change mc_top/mc_mid proportion
+  if(gutHR){
+    let active=false;
+    gutHR.onpointerdown = (e)=>{
+      if(Engine.resizeLocked) return;
+      active=true;
+      gutHR.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    };
+    gutHR.onpointermove = (e)=>{
+      if(!active) return;
+      const r = wrap.getBoundingClientRect();
+      const y = e.clientY - r.top - 10; // inside padding
+      const topPct = clamp(pxToPctY(y), 18, 75);
+      // keep ticker zone in mind later via hTick
+      const mid = Number(m.state.mc_mid ?? 35);
+      // adjust top only
+      setVars(Number(m.state.mc_col ?? 70), topPct, mid);
+    };
+    gutHR.onpointerup = (e)=>{
+      active=false;
+      try{ gutHR.releasePointerCapture(e.pointerId); }catch(_){}
+      debounceMultiRerender(nodeId);
+    };
+  }
+
+  // Ticker split: change total top+mid so ticker height changes (we edit mc_mid keeping top)
+  if(gutHT){
+    let active=false;
+    gutHT.onpointerdown = (e)=>{
+      if(Engine.resizeLocked) return;
+      active=true;
+      gutHT.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    };
+    gutHT.onpointermove = (e)=>{
+      if(!active) return;
+      const r = wrap.getBoundingClientRect();
+      const y = e.clientY - r.top - 10;
+      const totalPct = clamp(pxToPctY(y), 45, 88); // top+mid
+      const top = Number(m.state.mc_top ?? 45);
+      const mid = clamp(totalPct - top, 10, 70);
+      setVars(Number(m.state.mc_col ?? 70), top, mid);
+    };
+    gutHT.onpointerup = (e)=>{
+      active=false;
+      try{ gutHT.releasePointerCapture(e.pointerId); }catch(_){}
+      debounceMultiRerender(nodeId);
+    };
+  }
+}
+
+let _multiDebounce = new Map();
+function debounceMultiRerender(nodeId){
+  if(_multiDebounce.has(nodeId)) clearTimeout(_multiDebounce.get(nodeId));
+  _multiDebounce.set(nodeId, setTimeout(()=>{
+    renderMultiChart(nodeId);
+  }, 260));
+}
+
+/* CORE helpers */
+function getCoreIdOrNull(){
+  for(const [id, n] of Engine.nodes){ if(n.type==="core") return id; }
+  return null;
+}
+function coreStateHint(){
+  const coreId = getCoreIdOrNull();
+  if(!coreId) return {};
+  const core = Engine.nodes.get(coreId);
+  return { symbol: core.state.symbol, interval: core.state.interval };
+}
+function syncAllChartsFromCore(coreId){
+  const core = Engine.nodes.get(coreId);
+  if(!core) return;
+  const sym = (core.state.symbol||"").trim();
+  const tf  = (core.state.interval||"").toString().trim();
+
+  for(const [id, n] of Engine.nodes){
+    if(n.type !== "chart") continue;
+    n.state.symbol = sym;
+    n.state.interval = tf;
+
+    const el = getNodeEl(id);
+    if(el){
+      const symInp = el.querySelector('input[data-k="symbol"]');
+      const tfSel  = el.querySelector('select[data-k="interval"]');
+      if(symInp) symInp.value = sym;
+      if(tfSel) tfSel.value = tf;
+    }
+    renderTradingViewWidgetSimple(id);
+  }
+}
+
+/* Lock UI */
+function applyResizeLockUI(){
+  const btn = $("#btnResizeLock");
+  if(btn) btn.textContent = Engine.resizeLocked ? "🔒 Resize: OFF" : "🔓 Resize: ON";
+
+  for(const [id] of Engine.nodes){
+    const el = getNodeEl(id);
+    if(!el) continue;
+    if(Engine.resizeLocked) el.classList.add("resizeLocked");
+    else el.classList.remove("resizeLocked");
+  }
+}
+
+/* Done Part 2 */
+
+/* Feeds */
+const FEEDS = {
+  myfxbook_news: "https://www.myfxbook.com/rss/latest-forex-news",
+  myfxbook_calendar: "https://www.myfxbook.com/rss/forex-economic-calendar-events"
+};
+
+async function loadFeed(nodeId){
+  const m = Engine.nodes.get(nodeId);
+  const box = document.getElementById("feed_" + nodeId);
+  if(!m || !box) return;
+
+  const feedUrl = FEEDS[m.state.feed] || FEEDS.myfxbook_news;
+  const limit = Number(m.state.limit || 10);
+  const filter = (m.state.filter||"").trim().toLowerCase();
+
+  box.innerHTML = `<div class="item"><small>Cargando…</small></div>`;
+
+  try{
+    const xmlText = await fetch(allOrigins(feedUrl), {cache:"no-store"}).then(r=>r.text());
+    const doc = new DOMParser().parseFromString(xmlText, "text/xml");
+    let items = Array.from(doc.querySelectorAll("item"));
+
+    if(filter){
+      items = items.filter(it=>{
+        const title = (it.querySelector("title")?.textContent||"").toLowerCase();
+        const desc  = (it.querySelector("description")?.textContent||"").toLowerCase();
+        return title.includes(filter) || desc.includes(filter);
+      });
+    }
+
+    items = items.slice(0, limit);
+    if(!items.length){
+      box.innerHTML = `<div class="item"><small>No hay items con ese filtro.</small></div>`;
+      return;
+    }
+
+    box.innerHTML = items.map(it=>{
+      const title = it.querySelector("title")?.textContent?.trim() || "Untitled";
+      const link  = it.querySelector("link")?.textContent?.trim() || "#";
+      const pub   = it.querySelector("pubDate")?.textContent?.trim() || "";
+      const desc  = it.querySelector("description")?.textContent?.trim() || "";
+      const short = desc.replace(/<[^>]+>/g,"").slice(0, 180);
+
+      return `
+        <div class="item">
+          <div style="font-weight:650; font-size:12.5px; line-height:1.25">${safeText(title)}</div>
+          <small>${safeText(pub)}</small><br>
+          <div class="hint" style="margin-top:6px">${safeText(short)}${short.length>=180?"…":""}</div>
+          <div style="margin-top:8px">
+            <a href="${safeText(link)}" target="_blank" rel="noopener">Abrir</a>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }catch(err){
+    box.innerHTML = `
+      <div class="item">
+        <div style="font-weight:650">Error cargando RSS</div>
+        <div class="hint">${safeText(String(err))}</div>
+        <div class="hint" style="margin-top:6px">Tip: si el proxy o feed se cae, luego cambiamos fuente.</div>
+      </div>
+    `;
+  }
+}
+
+/* Watchlist */
+function guessTimeframeFromCore(){
+  const coreId = getCoreIdOrNull();
+  if(!coreId) return "15";
+  return Engine.nodes.get(coreId)?.state?.interval?.toString() || "15";
+}
+
+function renderWatchlistTags(nodeId){
+  const m = Engine.nodes.get(nodeId);
+  const box = document.getElementById("watch_" + nodeId);
+  if(!m || !box) return;
+
+  const items = (m.state.items||"").split("\n").map(s=>s.trim()).filter(Boolean);
+  if(!items.length){
+    box.innerHTML = `<div class="hint">Agrega símbolos (uno por línea) y dale Render.</div>`;
+    return;
+  }
+
+  box.innerHTML = items.map(sym=>`<button class="tag" data-sym="${safeText(sym)}" title="Crear chart hijo">${safeText(sym)}</button>`).join("");
+
+  box.onclick = (e)=>{
+    const btn = e.target.closest(".tag[data-sym]");
+    if(!btn) return;
+    const sym = btn.dataset.sym;
+    const tf = guessTimeframeFromCore() || "15";
+    createNode({type:"chart", parentId: nodeId, state:{title:sym, symbol:sym, interval:tf}});
+    saveAuto();
+  };
+}
+
+/* Snapshots */
+function saveSnapshot(snapNodeId){
+  const snapNode = Engine.nodes.get(snapNodeId);
+  if(!snapNode) return;
+
+  const noteEl = document.getElementById("snapNote_" + snapNodeId);
+  const note = (noteEl?.value || "").trim();
+
+  let sym = "";
+  let tf  = "";
+  const coreId = getCoreIdOrNull();
+  if(coreId){
+    const c = Engine.nodes.get(coreId);
+    sym = (c.state.symbol||"").trim();
+    tf  = (c.state.interval||"").toString().trim();
+  }else{
+    for(const [id,n] of Engine.nodes){
+      if(n.type==="chart"){ sym=(n.state.symbol||"").trim(); tf=(n.state.interval||"").toString().trim(); break; }
+    }
+  }
+
+  const entry = { at: nowISO(), symbol: sym || "—", interval: tf || "—", note };
+  snapNode.state.list = Array.isArray(snapNode.state.list) ? snapNode.state.list : [];
+  snapNode.state.list.unshift(entry);
+
+  if(noteEl) noteEl.value = "";
+  renderSnapshots(snapNodeId);
+}
+
+function renderSnapshots(snapNodeId){
+  const m = Engine.nodes.get(snapNodeId);
+  const box = document.getElementById("snaps_" + snapNodeId);
+  if(!m || !box) return;
+
+  const list = Array.isArray(m.state.list) ? m.state.list : [];
+  if(!list.length){
+    box.innerHTML = `<div class="item"><small>No snapshots aún.</small></div>`;
+    return;
+  }
+
+  box.innerHTML = list.slice(0, 50).map((s, idx)=>`
+    <div class="item">
+      <div style="font-weight:650">${safeText(s.symbol)} • ${safeText(s.interval)}</div>
+      <small>${safeText(s.at)}</small>
+      <div class="hint" style="margin-top:6px">${safeText(s.note||"")}</div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" style="padding:7px 9px;border-radius:12px" data-act="snapOpen" data-idx="${idx}">📈 Open Chart</button>
+        <button class="btn bad" style="padding:7px 9px;border-radius:12px" data-act="snapDel" data-idx="${idx}">🗑️</button>
+      </div>
+    </div>
+  `).join("");
+
+  box.onclick = (e)=>{
+    const openBtn = e.target.closest('[data-act="snapOpen"]');
+    const delBtn  = e.target.closest('[data-act="snapDel"]');
+    if(openBtn){
+      const i = Number(openBtn.dataset.idx);
+      const s = list[i];
+      if(!s) return;
+      createNode({type:"chart", parentId:snapNodeId, state:{title:"Snapshot", symbol:s.symbol, interval:String(s.interval)}});
+      saveAuto();
+      return;
+    }
+    if(delBtn){
+      const i = Number(delBtn.dataset.idx);
+      if(!Number.isFinite(i)) return;
+      m.state.list.splice(i,1);
+      renderSnapshots(snapNodeId);
+      saveAuto();
+      return;
+    }
+  };
+}
+
+function exportSnapshots(snapNodeId){
+  const m = Engine.nodes.get(snapNodeId);
+  const list = Array.isArray(m?.state?.list) ? m.state.list : [];
+  const blob = new Blob([JSON.stringify({exportedAt:nowISO(), snapshots:list}, null, 2)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "techblue-snapshots.json";
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 1500);
+}
+
+/* Strategy */
+function runStrategy(nodeId){
+  const m = Engine.nodes.get(nodeId);
+  if(!m) return;
+
+  const tf = guessTimeframeFromCore() || "15";
+  const coreId = getCoreIdOrNull();
+  const coreSym = coreId ? (Engine.nodes.get(coreId).state.symbol||"OANDA:EURUSD") : "OANDA:EURUSD";
+  const tpl = m.state.template;
+
+  if(tpl === "ema_smc"){
+    createNode({type:"multichart", parentId:nodeId, state:{title:"Multi (HTF->LTF)", symbol:coreSym, cells:["240","60","15","1"]}});
+    createNode({type:"notes", parentId:nodeId, state:{title:"Rules", text:
+`EMA Trend Filter:
+- 13 EMA vs 50 EMA define tendencia
+Entrada 1m:
+- EMA3 cruza EMA7 a favor HTF
+- Rechazo en EMA50 + confirmación
+SMC:
+- Barrido de liquidez
+- Retest Order Block
+- BOS a favor
+RSI:
+- Compra >50 subiendo
+- Venta <50 bajando`}});
+    createNode({type:"news", parentId:nodeId, state:{title:"News (USD)", feed:"myfxbook_news", limit:10, filter:"USD"}});
+  }
+  else if(tpl === "liquidity_50"){
+    createNode({type:"multichart", parentId:nodeId, state:{title:"Structure Pack", symbol:coreSym, cells:["240","60","15","1"]}});
+    createNode({type:"notes", parentId:nodeId, state:{title:"Plan 50% + Liquidity", text:
+`1) Marcar alto/bajo del impulso
+2) Marcar 50% del movimiento
+3) Esperar retroceso a 50%
+4) Esperar barrido de liquidez (arriba/abajo)
+5) Reingreso a la zona -> entrada hacia 50%
+SL: más allá del último high/low (incluye mechas)`}});
+    createNode({type:"calendar", parentId:nodeId, state:{title:"Calendar USD", feed:"myfxbook_calendar", limit:15, filter:"USD"}});
+  }
+  else if(tpl === "scalp_pack"){
+    createNode({type:"multichart", parentId:nodeId, state:{title:"Scalp Multi", symbol:coreSym, cells:["60","15","5","1"]}});
+    createNode({type:"news", parentId:nodeId, state:{title:"Hot News", feed:"myfxbook_news", limit:10, filter:"rate"}});
+    createNode({type:"alerts", parentId:nodeId, state:{title:"Alerts", enabled:false, mode:"crypto", symbol:"bitcoin", everySec:15}});
+    createNode({type:"notes", parentId:nodeId, state:{title:"Scalp Notes", text:"Setup / rules / risk…"}});
+  }
+
+  m.state.lastRun = `Generated @ ${nowISO()} — template: ${tpl}`;
+  const last = document.getElementById("stratLast_" + nodeId);
+  if(last) last.textContent = m.state.lastRun;
+}
+
+/* Alerts */
+function testNotify(title, body){
+  if(!("Notification" in window)){
+    alert("Este navegador no soporta Notification API.");
+    return;
+  }
+  if(Notification.permission === "granted"){
+    new Notification(title, {body});
+    return;
+  }
+  if(Notification.permission !== "denied"){
+    Notification.requestPermission().then(p=>{
+      if(p==="granted") new Notification(title, {body});
+      else alert("Permiso de notificaciones denegado.");
+    });
+    return;
+  }
+  alert("Notificaciones están bloqueadas. (Chrome: candado → Notifications)");
+}
+
+function renderAlerts(nodeId){
+  const m = Engine.nodes.get(nodeId);
+  const box = document.getElementById("alerts_" + nodeId);
+  if(!m || !box) return;
+
+  const rules = Array.isArray(m.state.rules) ? m.state.rules : (m.state.rules = []);
+  const status = Engine.alertTimers.has(nodeId) ? "RUNNING" : "STOPPED";
+
+  const header = `
+    <div class="item">
+      <div style="font-weight:650">Status: ${status}</div>
+      <div class="hint">Enabled: ${m.state.enabled ? "On" : "Off"} • Mode: ${safeText(m.state.mode)} • Every: ${safeText(String(m.state.everySec))}s</div>
+    </div>
+  `;
+
+  if(!rules.length){
+    box.innerHTML = header + `<div class="item"><small>No rules yet. Click “Add rule”.</small></div>`;
+    return;
+  }
+
+  box.innerHTML = header + rules.map((r, idx)=>`
+    <div class="item">
+      <div style="font-weight:650">Rule #${idx+1}: price ${safeText(r.op)} ${safeText(String(r.value))}</div>
+      <div class="hint">${safeText(r.note||"")}</div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn bad" style="padding:7px 9px;border-radius:12px" data-act="alertDel" data-idx="${idx}">🗑️ Delete</button>
+      </div>
+    </div>
+  `).join("");
+
+  box.onclick = (e)=>{
+    const del = e.target.closest('[data-act="alertDel"]');
+    if(!del) return;
+    const i = Number(del.dataset.idx);
+    if(!Number.isFinite(i)) return;
+    rules.splice(i,1);
+    renderAlerts(nodeId);
+    saveAuto();
+  };
+}
+
+function addAlertRule(nodeId){
+  const m = Engine.nodes.get(nodeId);
+  if(!m) return;
+  const op = prompt("Operador: >, <, >=, <=, =="," > ");
+  if(op===null) return;
+  const valueStr = prompt("Valor (número):","65000");
+  if(valueStr===null) return;
+  const value = Number(valueStr);
+  if(!Number.isFinite(value)) return alert("Valor inválido.");
+  const note = prompt("Nota (opcional):","breakout") || "";
+
+  m.state.rules = Array.isArray(m.state.rules) ? m.state.rules : [];
+  m.state.rules.push({op: op.trim(), value, note});
+  renderAlerts(nodeId);
+}
+
+async function fetchCryptoUSD(coinId){
+  const url = `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(coinId)}&vs_currencies=usd`;
+  const data = await fetch(url, {cache:"no-store"}).then(r=>r.json());
+  const v = data?.[coinId]?.usd;
+  if(typeof v !== "number") throw new Error("CoinGecko: no price for " + coinId);
+  return v;
+}
+
+function compare(op, a, b){
+  if(op === ">")  return a > b;
+  if(op === "<")  return a < b;
+  if(op === ">=") return a >= b;
+  if(op === "<=") return a <= b;
+  if(op === "==") return a === b;
+  return false;
+}
+
+async function evalAlertsOnce(nodeId){
+  const m = Engine.nodes.get(nodeId);
+  if(!m || !m.state.enabled) return;
+
+  const rules = Array.isArray(m.state.rules) ? m.state.rules : [];
+  if(!rules.length) return;
+
+  let price = null;
+  if(m.state.mode === "crypto"){
+    const coinId = (m.state.symbol || "bitcoin").trim().toLowerCase();
+    price = await fetchCryptoUSD(coinId);
+  }else{
+    price = Number(m.state.manualPrice);
+    if(!Number.isFinite(price)) return;
+  }
+
+  for(const r of rules){
+    if(compare(r.op, price, Number(r.value))){
+      testNotify("Tech Blue Alert", `${m.state.mode==="crypto" ? (m.state.symbol||"crypto") : "manual"} price ${price} ${r.op} ${r.value} • ${r.note||""}`);
+    }
+  }
+}
+
+function startAlerts(nodeId){
+  stopAlerts(nodeId);
+  const m = Engine.nodes.get(nodeId);
+  if(!m) return;
+
+  if(!m.state.enabled){
+    const ok = confirm("Enabled está Off. ¿Quieres encenderlo?");
+    if(!ok) return;
+    m.state.enabled = true;
+    const el = getNodeEl(nodeId);
+    const enabledSel = el?.querySelector('select[data-k="enabled"]');
+    if(enabledSel) enabledSel.value = "true";
+  }
+
+  const every = Math.max(5, Number(m.state.everySec || 15));
+  const timer = setInterval(()=>{
+    evalAlertsOnce(nodeId).catch(()=>{});
+  }, every * 1000);
+
+  Engine.alertTimers.set(nodeId, timer);
+  renderAlerts(nodeId);
+}
+
+function stopAlerts(nodeId){
+  const t = Engine.alertTimers.get(nodeId);
+  if(t){ clearInterval(t); Engine.alertTimers.delete(nodeId); }
+  const m = Engine.nodes.get(nodeId);
+  if(m && m.type==="alerts") renderAlerts(nodeId);
+}
+
+/* Save/Load */
+function snapshot(){
+  return {
+    version: 13,
+    savedAt: nowISO(),
+    resizeLocked: !!Engine.resizeLocked,
+    nodes: Array.from(Engine.nodes.values()).map(n=>({
+      id:n.id, type:n.type, parentId:n.parentId,
+      x:n.x,y:n.y,w:n.w,h:n.h,
+      state:n.state,
+      angleIndex:n.angleIndex||0
+    })),
+    edges: Engine.edges.slice()
+  };
+}
+
+function applySnapshot(data){
+  for(const [id] of Engine.alertTimers) stopAlerts(id);
+
+  Engine.nodes.clear();
+  Engine.edges = [];
+  $("#nodes").innerHTML = "";
+  $("#wires").innerHTML = "";
+
+  const byId = new Map();
+
+  for(const n of (data.nodes||[])){
+    const model = {
+      id:n.id,
+      type:n.type,
+      parentId:n.parentId ?? null,
+      x:n.x ?? 100, y:n.y ?? 100,
+      w:n.w ?? 320, h:n.h ?? 320,
+      state: {...defaultNodeState(n.type), ...(n.state||{})},
+      createdAt: Date.now(),
+      angleIndex: n.angleIndex || 0,
+    };
+
+    Engine.nodes.set(model.id, model);
+    byId.set(model.id, true);
+
+    // Build DOM using createNode-like html, but with stored id
+    const el = document.createElement("div");
+    el.className = "node";
+    el.dataset.id = model.id;
+    el.dataset.type = model.type;
+    el.style.zIndex = (++Engine.z).toString();
+    el.style.width = model.w + "px";
+    el.style.height = model.h + "px";
+
+    el.innerHTML = `
+      <div class="nodeHead" data-drag>
+        <div class="nodeTitle">
+          <span class="chip">${model.type.toUpperCase()}</span>
+          <b data-title>${safeText(model.state.title || model.type)}</b>
+        </div>
+        <div class="nodeTools">
+          <button class="mini" title="Crear nodo hijo" data-act="spawn">＋</button>
+          ${model.type==="core" ? "" : `<button class="mini" title="Front" data-act="front">⬆</button>`}
+          ${model.type==="core" ? "" : `<button class="mini" title="Eliminar" data-act="del">✕</button>`}
+        </div>
+      </div>
+      <div class="nodeBody">${renderBody(model.type, model.id, model.state)}</div>
+      <div class="nodeResizer" title="Resize window" data-resize></div>
+    `;
+
+    $("#nodes").appendChild(el);
+    syncNodeDOM(model.id);
+    bindNode(model.id);
+
+    // init special
+    if(model.type==="watchlist") renderWatchlistTags(model.id);
+    if(model.type==="snapshots") renderSnapshots(model.id);
+    if(model.type==="alerts") renderAlerts(model.id);
+    if(model.type==="multichart"){ applyMultiLayout(model.id); renderMultiChart(model.id); bindMultiResize(model.id); }
+  }
+
+  Engine.edges = (data.edges||[]).filter(e=> byId.has(e.from) && byId.has(e.to));
+
+  for(const [id, m] of Engine.nodes){
+    if(m.type==="chart" || m.type==="core") renderTradingViewWidgetSimple(id);
+    if(m.type==="news" || m.type==="calendar") loadFeed(id);
+  }
+
+  Engine.resizeLocked = !!data.resizeLocked;
+  applyResizeLockUI();
+  drawWires();
+  saveAuto();
+}
+
+function saveAuto(){
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(snapshot())); }catch(_){}
+}
+function loadAuto(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(!raw) return false;
+    applySnapshot(JSON.parse(raw));
+    return true;
+  }catch(_){ return false; }
+}
+
+/* Workspace Mode */
+function applyWorkspace(mode){
+  const sr = stageRect();
+  const padX = 14;
+  const padY = 70;
+
+  if(mode === "free") return;
+
+  const core = [], multi=[], charts=[], news=[], cal=[], watch=[], snaps=[], strat=[], alerts=[], notes=[];
+  for(const [id,n] of Engine.nodes){
+    if(n.type==="core") core.push(n);
+    else if(n.type==="multichart") multi.push(n);
+    else if(n.type==="chart") charts.push(n);
+    else if(n.type==="news") news.push(n);
+    else if(n.type==="calendar") cal.push(n);
+    else if(n.type==="watchlist") watch.push(n);
+    else if(n.type==="snapshots") snaps.push(n);
+    else if(n.type==="strategy") strat.push(n);
+    else if(n.type==="alerts") alerts.push(n);
+    else notes.push(n);
+  }
+
+  let colA=[], colB=[], colC=[];
+  if(mode==="london"){
+    colA = [...core, ...watch, ...strat];
+    colB = [...multi, ...charts];
+    colC = [...cal, ...news, ...snaps, ...alerts, ...notes];
+  }else if(mode==="ny"){
+    colA = [...core, ...watch, ...alerts];
+    colB = [...multi, ...charts];
+    colC = [...news, ...cal, ...snaps, ...strat, ...notes];
+  }else{
+    colA = [...core, ...snaps, ...notes];
+    colB = [...multi, ...charts];
+    colC = [...news, ...cal, ...watch, ...strat, ...alerts];
+  }
+
+  const colW = Math.max(360, Math.floor((sr.width - padX*4)/3));
+  const x1 = padX;
+  const x2 = padX*2 + colW;
+  const x3 = padX*3 + colW*2;
+
+  function stack(col, x){
+    let y = padY;
+    for(const n of col){
+      n.x = clamp(x, 10, sr.width - n.w - 10);
+      n.y = clamp(y, 64, sr.height - n.h - 10);
+      syncNodeDOM(n.id);
+      y += n.h + 12;
+    }
+  }
+
+  stack(colA, x1);
+  stack(colB, x2);
+  stack(colC, x3);
+
+  drawWires();
+  saveAuto();
+}
+
+/* Top buttons */
+$("#btnResizeLock").onclick = ()=>{
+  Engine.resizeLocked = !Engine.resizeLocked;
+  applyResizeLockUI();
+  saveAuto();
+};
+
+$("#btnAddMulti").onclick  = ()=>{ createNode({type:"multichart", parentId:getCoreIdOrNull(), state:{...defaultNodeState("multichart"), ...coreStateHint(), cells:["240","60","15","1"]}}); saveAuto(); };
+$("#btnAddChart").onclick  = ()=>{ createNode({type:"chart", parentId:getCoreIdOrNull(), state: coreStateHint()}); saveAuto(); };
+$("#btnAddNews").onclick   = ()=>{ createNode({type:"news", parentId:getCoreIdOrNull()}); saveAuto(); };
+$("#btnAddCal").onclick    = ()=>{ createNode({type:"calendar", parentId:getCoreIdOrNull(), state:{feed:"myfxbook_calendar"}}); saveAuto(); };
+$("#btnAddWatch").onclick  = ()=>{ createNode({type:"watchlist", parentId:getCoreIdOrNull()}); saveAuto(); };
+$("#btnAddSnap").onclick   = ()=>{ createNode({type:"snapshots", parentId:getCoreIdOrNull()}); saveAuto(); };
+$("#btnAddStrat").onclick  = ()=>{ createNode({type:"strategy", parentId:getCoreIdOrNull()}); saveAuto(); };
+$("#btnAddAlert").onclick  = ()=>{ createNode({type:"alerts", parentId:getCoreIdOrNull()}); saveAuto(); };
+$("#btnAddNote").onclick   = ()=>{ createNode({type:"notes", parentId:getCoreIdOrNull()}); saveAuto(); };
+
+$("#btnWorkspace").onclick = ()=>{
+  const mode = $("#workspaceSel").value;
+  applyWorkspace(mode);
+};
+
+$("#btnSave").onclick = ()=>{ saveAuto(); alert("✅ Guardado en localStorage"); };
+$("#btnLoad").onclick = ()=>{ if(!loadAuto()) alert("No hay save todavía."); };
+
+$("#btnExport").onclick = ()=>{
+  const data = snapshot();
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "techblue-node-engine-v1_3.json";
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 1500);
+};
+
+$("#btnImport").onclick = async ()=>{
+  const inp = document.createElement("input");
+  inp.type = "file";
+  inp.accept = "application/json";
+  inp.onchange = async ()=>{
+    const f = inp.files?.[0];
+    if(!f) return;
+    const txt = await f.text();
+    try{
+      applySnapshot(JSON.parse(txt));
+      alert("✅ Importado");
+    }catch(err){
+      alert("❌ JSON inválido: " + err);
+    }
+  };
+  inp.click();
+};
+
+$("#btnResetAll").onclick = ()=>{
+  if(!confirm("Esto borra TODO (layout + nodos) en este navegador. ¿Seguro?")) return;
+  localStorage.removeItem(STORE_KEY);
+  location.reload();
+};
+
+/* Boot */
+(function init(){
+  const loaded = loadAuto();
+  if(!loaded){
+    const sr = stageRect();
+
+    createNode({
+      type:"core",
+      parentId:null,
+      x: Math.round(sr.width/2 - 180),
+      y: Math.round(sr.height/2 - 240),
+      state: { title:"CORE", symbol:"OANDA:EURUSD", interval:"15" }
+    });
+
+    createNode({type:"multichart", parentId:getCoreIdOrNull(), state:{title:"Multi HTF→LTF", symbol:"OANDA:EURUSD", cells:["240","60","15","1"]}});
+    createNode({type:"watchlist", parentId:getCoreIdOrNull(), state:{title:"Watchlist"}});
+    createNode({type:"news", parentId:getCoreIdOrNull(), state:{title:"Forex News", feed:"myfxbook_news", limit:10, filter:"USD"}});
+    createNode({type:"calendar", parentId:getCoreIdOrNull(), state:{title:"Calendar", feed:"myfxbook_calendar", limit:15, filter:"USD"}});
+    createNode({type:"snapshots", parentId:getCoreIdOrNull(), state:{title:"Snapshots"}});
+    createNode({type:"strategy", parentId:getCoreIdOrNull(), state:{title:"Strategy", template:"ema_smc"}});
+    createNode({type:"alerts", parentId:getCoreIdOrNull(), state:{title:"Alerts", enabled:false, mode:"crypto", symbol:"bitcoin", everySec:15, rules:[{op:">", value:65000, note:"BTC breakout"}]}});
+    createNode({type:"notes", parentId:getCoreIdOrNull(), state:{title:"Plan", text:"1) HTF trend\n2) Liquidity\n3) Entry\n4) Risk\n"}});
+
+    saveAuto();
+    applyWorkspace("london");
+  }
+})();
+</script>
+
+</body>
+</html>
